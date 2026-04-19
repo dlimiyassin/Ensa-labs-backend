@@ -1,0 +1,109 @@
+package com.ensa.labs.zBase.security.service.impl;
+
+import com.ensa.labs.zBase.security.bean.Role;
+import com.ensa.labs.zBase.security.bean.User;
+import com.ensa.labs.zBase.security.bean.enums.UserStatus;
+import com.ensa.labs.zBase.security.dao.facade.RoleDao;
+import com.ensa.labs.zBase.security.dao.facade.UserDao;
+import com.ensa.labs.zBase.security.service.facade.AuthService;
+import com.ensa.labs.zBase.security.service.facade.UserService;
+import com.ensa.labs.zBase.security.utils.JWTHelper;
+import com.ensa.labs.zBase.security.ws.dto.JWTAuthResponse;
+import com.ensa.labs.zBase.security.ws.dto.LoginDto;
+import com.ensa.labs.zBase.security.ws.dto.RegisterDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+public class AuthServiceImpl implements AuthService {
+
+    private final UserDao userDao;
+    private final RoleDao roleDao;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JWTHelper jwtHelper;
+    private final UserService userService;
+
+    public AuthServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTHelper jwtHelper, UserService userService) {
+        this.userDao = userDao;
+        this.roleDao = roleDao;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtHelper = jwtHelper;
+        this.userService = userService;
+    }
+
+    @Override
+    public JWTAuthResponse login(LoginDto loginDto) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                loginDto.getEmail(),
+                loginDto.getPassword()
+        );
+        Authentication authenticate;
+        try {
+            authenticate = authenticationManager.authenticate(authenticationToken);
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException("Email or Password incorrect");
+        }
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authenticate.getPrincipal();
+
+        userService.updateLastLogin(user.getUsername());
+
+        String jwtAccessToken = jwtHelper.generateAccessToken(
+                user.getUsername(),
+                user.getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList())
+        );
+        String jwtRefreshToken = jwtHelper.generateRefreshToken(user.getUsername());
+        return new JWTAuthResponse(jwtAccessToken, jwtRefreshToken);
+    }
+
+    @Override
+    @Transactional
+    public String register(RegisterDto registerDto) {
+
+        if (userDao.findByEmail(registerDto.getEmail()).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email already exists"
+            );
+        }
+
+        Set<Role> roles = new HashSet<>();
+        Role userRole = roleDao.findByName("ROLE_STUDENT")
+                .orElseThrow(() -> new IllegalStateException("ROLE_USER not found"));
+        roles.add(userRole);
+
+        User user = new User();
+        user.setFirstName(registerDto.getFirstName());
+        user.setLastName(registerDto.getLastName());
+        user.setPhoneNumber(registerDto.getPhoneNumber());
+        user.setEmail(registerDto.getEmail());
+        user.setEnabled(true);
+        user.setStatus(UserStatus.ACTIF);
+        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+        user.setRoles(roles);
+
+        userDao.save(user);
+
+        return "User registered successfully";
+    }
+
+}

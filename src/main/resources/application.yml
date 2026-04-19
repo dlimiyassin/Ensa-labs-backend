@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: ensa-labs
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ensa_labs
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+
+  jackson:
+    serialization:
+      indent_output: true
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+
+security:
+  enabled: true
+
+export:
+  anonymization:
+    salt: ensa-labs-secret-2025
