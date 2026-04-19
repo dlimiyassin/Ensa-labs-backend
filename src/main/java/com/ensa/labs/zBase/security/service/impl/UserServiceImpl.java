@@ -1,6 +1,5 @@
 package com.ensa.labs.zBase.security.service.impl;
 
-
 import com.ensa.labs.exception.AuthenticationRequiredException;
 import com.ensa.labs.exception.GlobalException;
 import com.ensa.labs.exception.ResourceAlreadyExistsException;
@@ -11,7 +10,6 @@ import com.ensa.labs.zBase.security.bean.enums.UserStatus;
 import com.ensa.labs.zBase.security.dao.facade.UserDao;
 import com.ensa.labs.zBase.security.service.facade.RoleService;
 import com.ensa.labs.zBase.security.service.facade.UserService;
-import com.ensa.labs.zBase.security.utils.SecurityUtil;
 import com.ensa.labs.zBase.util.CollectionUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -27,7 +25,6 @@ import java.util.*;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
-
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
 
@@ -48,38 +45,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User loadUserByEmail(String email) {
-        return userDao.findByEmail(email)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User", "Email", email)
-                );
+    public User loadUserByUsername(String username) {
+        return userDao.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
     }
 
     @Override
     public User loadAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new AuthenticationRequiredException("No authenticated user found");
         }
-
-        String email = authentication.getName();
-        return userDao.findByEmail(email)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User", "Email", email)
-                );
+        return loadUserByUsername(authentication.getName());
     }
 
-
     @Override
-    public User createUser(String email, String password) {
-        String encodedPassword = passwordEncoder.encode(password);
-        return userDao.save(new User(email, encodedPassword));
+    public User createUser(String username, String password) {
+        return userDao.save(new User(username, passwordEncoder.encode(password)));
     }
 
     @Override
     public User save(User user) {
-        findByEmail(user.getEmail());
+        findByUsername(user.getUsername());
         prepareSave(user);
         return userDao.save(user);
     }
@@ -98,16 +85,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User saveWithAssociatedEmployee(User user) {
-        findByEmail(user.getEmail());
-        String password = SecurityUtil.generatePassword();
-        user.setPassword(passwordEncoder.encode(password));
-        Set<Role> roles = new HashSet<>();
-        for (Role role : user.getRoles()) {
-            Optional<Role> userRole = Optional.ofNullable(roleService.findByName(role.getName()));
-            userRole.ifPresent(roles::add);
+        findByUsername(user.getUsername());
+        if (user.getCin() != null && !user.getCin().isBlank()) {
+            user.setPassword(passwordEncoder.encode(user.getCin()));
         }
-        user.setRoles(roles);
-
+        prepareSave(user);
         return userDao.save(user);
     }
 
@@ -122,27 +104,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(User user) {
         User found = findById(user.getId());
-
         found.setFirstName(user.getFirstName());
         found.setLastName(user.getLastName());
         found.setPhoneNumber(user.getPhoneNumber());
         found.setEnabled(user.isEnabled());
-
-        if (found.isEnabled()) {
-            found.setStatus(UserStatus.ACTIF);
-        } else {
-            found.setStatus(UserStatus.BLOQUE);
-        }
-
+        found.setStatus(found.isEnabled() ? UserStatus.ACTIF : UserStatus.BLOQUE);
         return userDao.save(found);
     }
 
-
     @Override
-    public void delete(String id) {
-        findById(id);
-        userDao.deleteById(id);
-    }
+    public void delete(String id) { findById(id); userDao.deleteById(id); }
 
     @Override
     public User findById(String id) {
@@ -150,50 +121,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAll() {
-        return userDao.findAll();
-    }
+    public List<User> findAll() { return userDao.findAll(); }
 
-    private void findByEmail(String email) {
-        userDao.findByEmail(email).ifPresent(user -> {
-            throw new ResourceAlreadyExistsException("User", "email", email);
+    private void findByUsername(String username) {
+        userDao.findByUsername(username).ifPresent(user -> {
+            throw new ResourceAlreadyExistsException("User", "username", username);
         });
     }
 
     @Override
-    public void assignRoleToUser(String email, String roleName) {
-        User user = loadUserByEmail(email);
-        Role role = roleService.findByName(roleName);
-        user.getRoles().add(role);
+    public void assignRoleToUser(String username, String roleName) {
+        User user = loadUserByUsername(username);
+        user.getRoles().add(roleService.findByName(roleName));
     }
 
     @Override
-    public User updatePassword(String email, String newPassword) {
-        User user = userDao.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+    public User updatePassword(String username, String newPassword) {
+        User user = loadUserByUsername(username);
         user.setPassword(passwordEncoder.encode(newPassword));
         return userDao.save(user);
     }
 
     @Override
-    public User updatePasswordBasedOnCurrentPassword(String email, String currentPassword, String newPassword) {
-        User foundedUser = userDao.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
-        if (passwordEncoder.matches(currentPassword, foundedUser.getPassword())) {
-            foundedUser.setPassword(passwordEncoder.encode(newPassword));
-            return userDao.save(foundedUser);
-        } else {
+    public User updatePasswordBasedOnCurrentPassword(String username, String currentPassword, String newPassword) {
+        User foundedUser = loadUserByUsername(username);
+        if (!passwordEncoder.matches(currentPassword, foundedUser.getPassword())) {
             throw new GlobalException(HttpStatus.CONFLICT, "Current password is incorrect");
         }
+        foundedUser.setPassword(passwordEncoder.encode(newPassword));
+        return userDao.save(foundedUser);
     }
 
     @Override
-    public void updateLastLogin(String email) {
-        User user = userDao.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
-
+    public void updateLastLogin(String username) {
+        User user = loadUserByUsername(username);
         user.setLastLogin(Instant.now());
         userDao.save(user);
     }
-
-
 }

@@ -1,9 +1,7 @@
 package com.ensa.labs.zBase.security.service.facade;
 
-
 import com.ensa.labs.zBase.security.bean.Role;
 import com.ensa.labs.zBase.security.bean.User;
-import com.ensa.labs.zBase.security.dao.criteria.UserCriteria;
 
 import java.util.List;
 import java.util.Set;
@@ -12,11 +10,11 @@ public interface UserService {
 
     List<User> findUsersByRoles(Set<Role> roles);
 
-    User loadUserByEmail(String email);
+    User loadUserByUsername(String username);
 
     User loadAuthenticatedUser();
 
-    User createUser(String email, String password);
+    User createUser(String username, String password);
 
     User save(User user);
 
@@ -32,11 +30,11 @@ public interface UserService {
 
     List<User> findAll();
 
-    void assignRoleToUser(String email, String roleName);
+    void assignRoleToUser(String username, String roleName);
 
-    User updatePassword(String email, String newPassword);
+    User updatePassword(String username, String newPassword);
 
-    User updatePasswordBasedOnCurrentPassword(String email, String currentPassword, String newPassword);
+    User updatePasswordBasedOnCurrentPassword(String username, String currentPassword, String newPassword);
 
     void updateLastLogin(String username);
 }

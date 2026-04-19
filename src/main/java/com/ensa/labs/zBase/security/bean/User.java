@@ -1,7 +1,9 @@
 package com.ensa.labs.zBase.security.bean;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ensa.labs.research.bean.Lab;
+import com.ensa.labs.research.bean.Team;
 import com.ensa.labs.zBase.security.bean.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,19 +23,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    // personal information
+    @Column(unique = true, nullable = false, length = 80)
+    private String username;
+
+    @Column(unique = true, length = 150)
+    private String email;
+
+    @Column(length = 30)
+    private String cin;
+
     @Column(length = 100)
     private String firstName;
 
     @Column(length = 100)
     private String lastName;
 
-    @Column(unique = true, nullable = false)
-    private String email;
-
     private String phoneNumber;
 
-    // business logic
     @Column(nullable = false)
     private String password;
 
@@ -53,14 +59,20 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    public User() {}
+    @ManyToMany(mappedBy = "members")
+    private Set<Team> teams = new HashSet<>();
 
-    public User(String email, String password) {
-        this.email = email;
+    @ManyToMany(mappedBy = "users")
+    private Set<Lab> labs = new HashSet<>();
+
+    public User() {
+    }
+
+    public User(String username, String password) {
+        this.username = username;
         this.password = password;
     }
 
-    // helpers
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -72,13 +84,5 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
-                '}';
     }
 }

@@ -1,10 +1,10 @@
-package com.ensa.labs.zBase.security.ws.dto;
+package com.ensa.labs.research.dto;
 
 import com.ensa.labs.zBase.security.bean.enums.UserStatus;
 
 import java.util.List;
 
-public record UserDto(
+public record UserDTO(
         String id,
         String username,
         String cin,
@@ -14,7 +14,8 @@ public record UserDto(
         String phoneNumber,
         boolean enabled,
         UserStatus status,
-        String lastLogin,
-        List<RoleDto> roleDtos
+        List<String> roleIds,
+        List<String> teamIds,
+        List<String> labIds
 ) {
 }

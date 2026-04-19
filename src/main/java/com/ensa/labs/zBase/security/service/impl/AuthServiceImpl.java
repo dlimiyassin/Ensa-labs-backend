@@ -49,28 +49,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JWTAuthResponse login(LoginDto loginDto) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                loginDto.getEmail(),
-                loginDto.getPassword()
-        );
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
         Authentication authenticate;
         try {
             authenticate = authenticationManager.authenticate(authenticationToken);
         } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Email or Password incorrect");
+            throw new BadCredentialsException("Username or Password incorrect");
         }
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authenticate.getPrincipal();
-
         userService.updateLastLogin(user.getUsername());
 
-        String jwtAccessToken = jwtHelper.generateAccessToken(
-                user.getUsername(),
-                user.getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList())
-        );
+        String jwtAccessToken = jwtHelper.generateAccessToken(user.getUsername(), user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
         String jwtRefreshToken = jwtHelper.generateRefreshToken(user.getUsername());
         return new JWTAuthResponse(jwtAccessToken, jwtRefreshToken);
     }
@@ -78,32 +68,26 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String register(RegisterDto registerDto) {
-
-        if (userDao.findByEmail(registerDto.getEmail()).isPresent()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Email already exists"
-            );
+        if (userDao.findByUsername(registerDto.getUsername()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
 
         Set<Role> roles = new HashSet<>();
-        Role userRole = roleDao.findByName("ROLE_STUDENT")
-                .orElseThrow(() -> new IllegalStateException("ROLE_USER not found"));
-        roles.add(userRole);
+        roles.add(roleDao.findByName("RESEARCHER").orElseThrow(() -> new IllegalStateException("RESEARCHER role not found")));
 
         User user = new User();
         user.setFirstName(registerDto.getFirstName());
         user.setLastName(registerDto.getLastName());
         user.setPhoneNumber(registerDto.getPhoneNumber());
         user.setEmail(registerDto.getEmail());
+        user.setUsername(registerDto.getUsername());
+        user.setCin(registerDto.getCin());
         user.setEnabled(true);
         user.setStatus(UserStatus.ACTIF);
-        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+        user.setPassword(passwordEncoder.encode(registerDto.getCin()));
         user.setRoles(roles);
 
         userDao.save(user);
-
         return "User registered successfully";
     }
-
 }
