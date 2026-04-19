@@ -7,23 +7,20 @@ import com.ensa.labs.research.dao.PublicationRepository;
 import com.ensa.labs.research.dao.TeamRepository;
 import com.ensa.labs.research.dto.PublicationDTO;
 import com.ensa.labs.research.mapper.PublicationMapper;
-import com.ensa.labs.zBase.security.dao.facade.UserDao;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class PublicationService {
     private final PublicationRepository publicationRepository;
-    private final UserDao userDao;
     private final LabRepository labRepository;
     private final TeamRepository teamRepository;
     private final PublicationMapper publicationMapper;
 
-    public PublicationService(PublicationRepository publicationRepository, UserDao userDao, LabRepository labRepository, TeamRepository teamRepository, PublicationMapper publicationMapper) {
+    public PublicationService(PublicationRepository publicationRepository, LabRepository labRepository, TeamRepository teamRepository, PublicationMapper publicationMapper) {
         this.publicationRepository = publicationRepository;
-        this.userDao = userDao;
         this.labRepository = labRepository;
         this.teamRepository = teamRepository;
         this.publicationMapper = publicationMapper;
@@ -43,6 +40,11 @@ public class PublicationService {
         publication.setTitle(dto.title());
         publication.setType(dto.type());
         publication.setPublicationYear(dto.publicationYear());
+        publication.setAuthors(dto.authors() == null ? new ArrayList<>() : new ArrayList<>(dto.authors()));
+        publication.setJournal(dto.journal());
+        publication.setConference(dto.conference());
+        publication.setDoi(dto.doi());
+        publication.setPages(dto.pages());
         applyRelations(publication, dto);
         return publicationMapper.toDto(publicationRepository.save(publication));
     }
@@ -50,8 +52,7 @@ public class PublicationService {
     public void delete(String id) { publicationRepository.delete(get(id)); }
 
     private void applyRelations(Publication publication, PublicationDTO dto) {
-        publication.setAuthors(new HashSet<>(dto.authorIds().stream().map(id -> userDao.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id))).toList()));
-        publication.setLab(dto.labId() == null ? null : labRepository.findById(dto.labId()).orElseThrow(() -> new ResourceNotFoundException("Lab", "id", dto.labId())));
+        publication.setLab(labRepository.findById(dto.labId()).orElseThrow(() -> new ResourceNotFoundException("Lab", "id", dto.labId())));
         publication.setTeam(dto.teamId() == null ? null : teamRepository.findById(dto.teamId()).orElseThrow(() -> new ResourceNotFoundException("Team", "id", dto.teamId())));
     }
 

@@ -1,6 +1,5 @@
 package com.ensa.labs.zBase.security.bean;
 
-import com.ensa.labs.research.bean.Lab;
 import com.ensa.labs.research.bean.Team;
 import com.ensa.labs.zBase.security.bean.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -61,9 +60,6 @@ public class User {
 
     @ManyToMany(mappedBy = "members")
     private Set<Team> teams = new HashSet<>();
-
-    @ManyToMany(mappedBy = "users")
-    private Set<Lab> labs = new HashSet<>();
 
     public User() {
     }

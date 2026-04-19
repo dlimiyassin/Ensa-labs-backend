@@ -1,14 +1,13 @@
 package com.ensa.labs.research.bean;
 
 import com.ensa.labs.research.bean.enums.PublicationType;
-import com.ensa.labs.zBase.security.bean.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -19,19 +18,29 @@ public class Publication {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2000)
     private String title;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PublicationType type;
 
     private Integer publicationYear;
 
-    @ManyToMany
-    @JoinTable(name = "publication_authors", joinColumns = @JoinColumn(name = "publication_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
-    private Set<User> authors = new HashSet<>();
+    @ElementCollection
+    @CollectionTable(name = "publication_authors", joinColumns = @JoinColumn(name = "publication_id"))
+    @Column(name = "author_name")
+    private List<String> authors = new ArrayList<>();
 
-    @ManyToOne
+    private String journal;
+
+    private String conference;
+
+    private String doi;
+
+    private String pages;
+
+    @ManyToOne(optional = false)
     @JoinColumn(name = "lab_id")
     private Lab lab;
 

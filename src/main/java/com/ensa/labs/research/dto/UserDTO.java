@@ -15,7 +15,6 @@ public record UserDTO(
         boolean enabled,
         UserStatus status,
         List<String> roleIds,
-        List<String> teamIds,
-        List<String> labIds
+        List<String> teamIds
 ) {
 }

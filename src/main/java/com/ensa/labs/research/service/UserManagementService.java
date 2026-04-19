@@ -1,7 +1,6 @@
 package com.ensa.labs.research.service;
 
 import com.ensa.labs.exception.ResourceNotFoundException;
-import com.ensa.labs.research.dao.LabRepository;
 import com.ensa.labs.research.dao.TeamRepository;
 import com.ensa.labs.research.dto.UserDTO;
 import com.ensa.labs.research.mapper.UserMapper;
@@ -19,15 +18,13 @@ public class UserManagementService {
     private final UserDao userDao;
     private final RoleDao roleDao;
     private final TeamRepository teamRepository;
-    private final LabRepository labRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    public UserManagementService(UserDao userDao, RoleDao roleDao, TeamRepository teamRepository, LabRepository labRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public UserManagementService(UserDao userDao, RoleDao roleDao, TeamRepository teamRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userDao = userDao;
         this.roleDao = roleDao;
         this.teamRepository = teamRepository;
-        this.labRepository = labRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
     }
@@ -65,9 +62,7 @@ public class UserManagementService {
     private void applyRelations(User user, UserDTO dto) {
         user.setRoles(new HashSet<>(dto.roleIds().stream().map(roleId -> roleDao.findById(roleId).orElseThrow(() -> new ResourceNotFoundException("Role", "id", roleId))).toList()));
         user.setTeams(new HashSet<>(dto.teamIds().stream().map(teamId -> teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId))).toList()));
-        user.setLabs(new HashSet<>(dto.labIds().stream().map(labId -> labRepository.findById(labId).orElseThrow(() -> new ResourceNotFoundException("Lab", "id", labId))).toList()));
         user.getTeams().forEach(team -> team.getMembers().add(user));
-        user.getLabs().forEach(lab -> lab.getUsers().add(user));
     }
 
     private User get(String id) { return userDao.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id)); }

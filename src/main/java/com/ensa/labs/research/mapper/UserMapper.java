@@ -4,15 +4,12 @@ import com.ensa.labs.research.dto.UserDTO;
 import com.ensa.labs.zBase.security.bean.User;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public class UserMapper {
     public UserDTO toDto(User user) {
         return new UserDTO(user.getId(), user.getUsername(), user.getCin(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhoneNumber(), user.isEnabled(), user.getStatus(),
                 user.getRoles().stream().map(r -> r.getId()).toList(),
-                user.getTeams().stream().map(t -> t.getId()).toList(),
-                user.getLabs().stream().map(l -> l.getId()).toList());
+                user.getTeams().stream().map(t -> t.getId()).toList());
     }
 
     public User toEntity(UserDTO dto) {
