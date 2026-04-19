@@ -9,8 +9,12 @@ public record PublicationDTO(
         String title,
         PublicationType type,
         Integer publicationYear,
+        List<String> authors,
+        String journal,
+        String conference,
+        String doi,
+        String pages,
         String labId,
-        String teamId,
-        List<String> authorIds
+        String teamId
 ) {
 }

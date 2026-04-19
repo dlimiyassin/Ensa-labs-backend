@@ -7,19 +7,48 @@ import org.springframework.stereotype.Component;
 @Component
 public class LabMapper {
     public LabDTO toDto(Lab lab) {
-        return new LabDTO(lab.getId(), lab.getName(), lab.getAbbreviation(),
+        return new LabDTO(
+                lab.getId(),
+                lab.getTitleFr(),
+                lab.getTitleEn(),
+                lab.getAcronym(),
+                lab.getUniversity(),
+                lab.getProgram(),
+                lab.getAccreditationStart(),
+                lab.getAccreditationEnd(),
+                lab.getEstablishment(),
+                lab.getPhone(),
+                lab.getEmail(),
+                lab.getDirector() != null ? lab.getDirector().getId() : null,
+                lab.getDeputyDirector() != null ? lab.getDeputyDirector().getId() : null,
+                lab.getMembers().stream().map(m -> m.getId()).toList(),
+                lab.getResearchItems().stream().map(r -> r.getId()).toList(),
+                lab.getEquipments().stream().map(e -> e.getId()).toList(),
+                lab.getCompetences().stream().map(c -> c.getId()).toList(),
+                lab.getCollaborations().stream().map(c -> c.getId()).toList(),
+                lab.getProduction() != null ? lab.getProduction().getId() : null,
+                lab.getRegulations().stream().map(r -> r.getId()).toList(),
                 lab.getDepartment() != null ? lab.getDepartment().getId() : null,
                 lab.getResearchFields().stream().map(r -> r.getId()).toList(),
                 lab.getTeams().stream().map(t -> t.getId()).toList(),
                 lab.getUsers().stream().map(u -> u.getId()).toList(),
-                lab.getTags().stream().map(t -> t.getId()).toList());
+                lab.getTags().stream().map(t -> t.getId()).toList()
+        );
     }
 
     public Lab toEntity(LabDTO dto) {
         Lab lab = new Lab();
         lab.setId(dto.id());
-        lab.setName(dto.name());
-        lab.setAbbreviation(dto.abbreviation());
+        lab.setTitleFr(dto.titleFr());
+        lab.setTitleEn(dto.titleEn());
+        lab.setAcronym(dto.acronym());
+        lab.setUniversity(dto.university());
+        lab.setProgram(dto.program());
+        lab.setAccreditationStart(dto.accreditationStart());
+        lab.setAccreditationEnd(dto.accreditationEnd());
+        lab.setEstablishment(dto.establishment());
+        lab.setPhone(dto.phone());
+        lab.setEmail(dto.email());
         return lab;
     }
 }

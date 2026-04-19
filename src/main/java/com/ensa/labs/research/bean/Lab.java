@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -18,13 +19,60 @@ public class Lab {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(nullable = false)
+    private String titleFr;
+
+    @Column(nullable = false)
+    private String titleEn;
+
     @Column(nullable = false, unique = true)
-    private String name;
+    private String acronym;
 
-    @Column(unique = true)
-    private String abbreviation;
+    private String university;
 
-    @ManyToOne(optional = false)
+    private String program;
+
+    private LocalDate accreditationStart;
+
+    private LocalDate accreditationEnd;
+
+    private String establishment;
+
+    private String phone;
+
+    private String email;
+
+    @ManyToOne
+    @JoinColumn(name = "director_id")
+    private Member director;
+
+    @ManyToOne
+    @JoinColumn(name = "deputy_director_id")
+    private Member deputyDirector;
+
+    @OneToMany(mappedBy = "lab")
+    private Set<Member> members = new HashSet<>();
+
+    @OneToMany(mappedBy = "lab")
+    private Set<ResearchItem> researchItems = new HashSet<>();
+
+    @OneToMany(mappedBy = "lab")
+    private Set<Equipment> equipments = new HashSet<>();
+
+    @OneToMany(mappedBy = "lab")
+    private Set<Competence> competences = new HashSet<>();
+
+    @OneToMany(mappedBy = "lab")
+    private Set<Collaboration> collaborations = new HashSet<>();
+
+    @OneToOne(mappedBy = "lab", cascade = CascadeType.ALL)
+    private Production production;
+
+    @OneToMany(mappedBy = "lab")
+    private Set<Regulation> regulations = new HashSet<>();
+
+    // Keep existing relations for backward compatibility.
+    @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
 
