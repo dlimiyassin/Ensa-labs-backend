@@ -26,14 +26,14 @@ public class LabMapper {
                 lab.getDirecteurAdjoint() != null ? lab.getDirecteurAdjoint().getId() : null,
                 lab.getMembers().stream().map(m -> m.getId()).toList(),
                 lab.getComiteGestion().stream().map(ComiteGestionMembre::getNomEnseignant).toList(),
-                lab.getDomainesRecherche().stream().map(r -> r.getId()).toList(),
-                lab.getAxesRecherche().stream().map(r -> r.getId()).toList(),
+                lab.getDomainesRecherche().stream().map(r -> r.getName()).toList(),
+                lab.getAxesRecherche().stream().map(r -> r.getTitle()).toList(),
                 lab.getEquipments().stream().map(e -> e.getId()).toList(),
                 lab.getCompetences().stream().map(c -> c.getId()).toList(),
                 lab.getProduction() != null ? lab.getProduction().getId() : null,
-                lab.getDepartment() != null ? lab.getDepartment().getId() : null,
+                lab.getDepartment() != null ? lab.getDepartment().getName() : null,
                 lab.getEquipes().stream().map(t -> t.getId()).toList(),
-                lab.getTags().stream().map(t -> t.getId()).toList()
+                lab.getTags().stream().map(t -> t.getName()).toList()
         );
     }
 
