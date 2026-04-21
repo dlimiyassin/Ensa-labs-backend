@@ -74,7 +74,7 @@ public class Lab {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @OneToMany(mappedBy = "lab")
+    @OneToMany(mappedBy = "laboratoire")
     private Set<Team> teams = new HashSet<>();
 
     @ManyToMany

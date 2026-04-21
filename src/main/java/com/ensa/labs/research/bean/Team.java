@@ -1,6 +1,5 @@
 package com.ensa.labs.research.bean;
 
-import com.ensa.labs.zBase.security.bean.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,23 +18,23 @@ public class Team {
     private String id;
 
     @Column(nullable = false)
-    private String name;
+    private String nom;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "lab_id")
-    private Lab lab;
+    private Lab laboratoire;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "research_field_id")
-    private ResearchField researchField;
+    private ResearchField domaineRecherche;
 
     @ManyToMany
-    @JoinTable(name = "team_members", joinColumns = @JoinColumn(name = "team_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> members = new HashSet<>();
+    @JoinTable(name = "team_members", joinColumns = @JoinColumn(name = "team_id"), inverseJoinColumns = @JoinColumn(name = "member_id"))
+    private Set<Member> members = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "leader_id")
-    private User leader;
+    private Member chefEquipe;
 
     @Override
     public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; Team team = (Team) o; return Objects.equals(id, team.id);}    

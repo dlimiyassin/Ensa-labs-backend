@@ -4,10 +4,10 @@ import java.util.List;
 
 public record TeamDTO(
         String id,
-        String name,
-        String labId,
-        String researchFieldId,
-        String leaderId,
-        List<String> memberIds
+        String nom,
+        String laboratoireId,
+        String domaineRechercheId,
+        String chefEquipeId,
+        List<String> membresIds
 ) {
 }

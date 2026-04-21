@@ -2,14 +2,15 @@ package com.ensa.labs.research.bean;
 
 import com.ensa.labs.research.bean.enums.MemberGrade;
 import com.ensa.labs.research.bean.enums.MemberRoleInLab;
-import com.ensa.labs.zBase.security.bean.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -21,35 +22,34 @@ public class Member {
     private String id;
 
     @Column(nullable = false)
-    private String firstName;
+    private String prenom;
 
     @Column(nullable = false)
-    private String lastName;
+    private String nom;
 
     @Enumerated(EnumType.STRING)
     private MemberGrade grade;
 
-    private String speciality;
+    private String specialite;
 
-    private String establishment;
+    private String etablissement;
 
-    private boolean associated;
+    private boolean associe;
 
     @Enumerated(EnumType.STRING)
-    private MemberRoleInLab roleInLab = MemberRoleInLab.MEMBER;
+    private MemberRoleInLab roleDansLaboratoire = MemberRoleInLab.MEMBER;
 
     @ElementCollection
     @CollectionTable(name = "member_phd_students", joinColumns = @JoinColumn(name = "member_id"))
     @Column(name = "phd_student")
-    private List<String> phdStudents = new ArrayList<>();
+    private List<String> doctorantsEncadres = new ArrayList<>();
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "lab_id")
-    private Lab lab;
+    private Lab laboratoire;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @ManyToMany(mappedBy = "members")
+    private Set<Team> equipes = new HashSet<>();
 
     @Override
     public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; Member member = (Member) o; return Objects.equals(id, member.id);}    

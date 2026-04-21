@@ -9,22 +9,21 @@ import java.util.ArrayList;
 @Component
 public class MemberMapper {
     public MemberDTO toDto(Member member) {
-        return new MemberDTO(member.getId(), member.getFirstName(), member.getLastName(), member.getGrade(), member.getSpeciality(), member.getEstablishment(),
-                member.isAssociated(), member.getRoleInLab(), member.getPhdStudents(), member.getLab() != null ? member.getLab().getId() : null,
-                member.getUser() != null ? member.getUser().getId() : null);
+        return new MemberDTO(member.getId(), member.getPrenom(), member.getNom(), member.getGrade(), member.getSpecialite(), member.getEtablissement(),
+                member.isAssocie(), member.getRoleDansLaboratoire(), member.getDoctorantsEncadres(), member.getLaboratoire() != null ? member.getLaboratoire().getId() : null);
     }
 
     public Member toEntity(MemberDTO dto) {
         Member member = new Member();
         member.setId(dto.id());
-        member.setFirstName(dto.firstName());
-        member.setLastName(dto.lastName());
+        member.setPrenom(dto.prenom());
+        member.setNom(dto.nom());
         member.setGrade(dto.grade());
-        member.setSpeciality(dto.speciality());
-        member.setEstablishment(dto.establishment());
-        member.setAssociated(dto.associated());
-        member.setRoleInLab(dto.roleInLab());
-        member.setPhdStudents(dto.phdStudents() == null ? new ArrayList<>() : new ArrayList<>(dto.phdStudents()));
+        member.setSpecialite(dto.specialite());
+        member.setEtablissement(dto.etablissement());
+        member.setAssocie(dto.associe());
+        member.setRoleDansLaboratoire(dto.roleDansLaboratoire());
+        member.setDoctorantsEncadres(dto.doctorantsEncadres() == null ? new ArrayList<>() : new ArrayList<>(dto.doctorantsEncadres()));
         return member;
     }
 }

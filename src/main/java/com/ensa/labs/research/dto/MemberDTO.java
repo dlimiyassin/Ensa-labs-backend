@@ -7,15 +7,14 @@ import java.util.List;
 
 public record MemberDTO(
         String id,
-        String firstName,
-        String lastName,
+        String prenom,
+        String nom,
         MemberGrade grade,
-        String speciality,
-        String establishment,
-        boolean associated,
-        MemberRoleInLab roleInLab,
-        List<String> phdStudents,
-        String labId,
-        String userId
+        String specialite,
+        String etablissement,
+        boolean associe,
+        MemberRoleInLab roleDansLaboratoire,
+        List<String> doctorantsEncadres,
+        String laboratoireId
 ) {
 }

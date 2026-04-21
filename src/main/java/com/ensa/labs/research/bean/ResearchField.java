@@ -23,7 +23,7 @@ public class ResearchField {
     @ManyToMany(mappedBy = "researchFields")
     private Set<Lab> labs = new HashSet<>();
 
-    @OneToMany(mappedBy = "researchField")
+    @OneToMany(mappedBy = "domaineRecherche")
     private Set<Team> teams = new HashSet<>();
 
     @Override

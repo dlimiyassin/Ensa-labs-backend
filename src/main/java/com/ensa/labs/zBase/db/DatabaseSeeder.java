@@ -8,8 +8,6 @@ import com.ensa.labs.zBase.security.bean.User;
 import com.ensa.labs.zBase.security.bean.enums.UserStatus;
 import com.ensa.labs.zBase.security.dao.facade.RoleDao;
 import com.ensa.labs.zBase.security.dao.facade.UserDao;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -33,9 +31,8 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final ThesisRepository thesisRepository;
     private final ProductionRepository productionRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ObjectMapper objectMapper;
 
-    public DatabaseSeeder(RoleDao roleDao, UserDao userDao, LabRepository labRepository, MemberRepository memberRepository, ResearchFieldRepository researchFieldRepository, ResearchItemRepository researchItemRepository, CompetenceRepository competenceRepository, EquipmentRepository equipmentRepository, CollaborationRepository collaborationRepository, PublicationRepository publicationRepository, ThesisRepository thesisRepository, ProductionRepository productionRepository, PasswordEncoder passwordEncoder, ObjectMapper objectMapper) {
+    public DatabaseSeeder(RoleDao roleDao, UserDao userDao, LabRepository labRepository, MemberRepository memberRepository, ResearchFieldRepository researchFieldRepository, ResearchItemRepository researchItemRepository, CompetenceRepository competenceRepository, EquipmentRepository equipmentRepository, CollaborationRepository collaborationRepository, PublicationRepository publicationRepository, ThesisRepository thesisRepository, ProductionRepository productionRepository, PasswordEncoder passwordEncoder) {
         this.roleDao = roleDao;
         this.userDao = userDao;
         this.labRepository = labRepository;
@@ -49,116 +46,104 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.thesisRepository = thesisRepository;
         this.productionRepository = productionRepository;
         this.passwordEncoder = passwordEncoder;
-        this.objectMapper = objectMapper;
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         Role admin = createRoleIfMissing("ADMIN");
         Role researcher = createRoleIfMissing("RESEARCHER");
         seedUser("admin", "AA111", "admin@ensa.ma", "System", "Admin", Set.of(admin));
 
-        JsonNode root = objectMapper.readTree(DATA_JSON);
-        Lab lab = createLab(root.path("laboratoire"));
+        Lab lab = createLab();
 
-        Map<String, Member> members = seedMembers(root.path("membres_principaux"), lab, false, researcher);
-        members.putAll(seedMembers(root.path("membres_associes"), lab, true, researcher));
-        assignDirection(root.path("direction"), members, lab);
-        seedComiteGestion(root.path("comite_de_gestion"), lab);
+        Map<String, Member> members = seedMembers(PRINCIPAL_MEMBRES, lab, false);
+        members.putAll(seedMembers(MEMBRES_ASSOCIES, lab, true));
+        assignDirection(lab, members);
+        seedComiteGestion(lab);
 
-        seedThematiques(root.path("thematiques_recherche"), lab);
-        seedAxes(root.path("axes_recherche"), lab);
-        seedCompetences(root.path("competences"), lab);
-        seedEquipements(root.path("equipements"), lab);
-        seedCollaborations(root.path("collaborations"), text(root.path("laboratoire"), "etablissement_domiciliation"));
-        seedProduction(root.path("production_scientifique_2021_2024"), lab);
+        seedThematiques(lab);
+        seedAxes(lab);
+        seedCompetences(lab);
+        seedEquipements(lab);
+        seedCollaborations();
+        seedProduction(lab);
 
         labRepository.save(lab);
     }
 
-    private Lab createLab(JsonNode node) {
-        Lab lab = labRepository.findByAcronym(text(node, "acronyme")).orElseGet(Lab::new);
-        lab.setTitleFr(text(node, "intitule_fr"));
-        lab.setTitleEn(text(node, "intitule_en"));
-        lab.setAcronym(text(node, "acronyme"));
-        lab.setUniversity(text(node, "universite"));
-        lab.setProgram(text(node, "programme"));
-        lab.setEstablishment(text(node, "etablissement_domiciliation"));
-        lab.setPhone(text(node, "telephone"));
-        lab.setEmail(text(node, "email"));
+    private Lab createLab() {
+        Lab lab = labRepository.findByAcronym("LaRESI").orElseGet(Lab::new);
+        lab.setTitleFr("Laboratoire de Recherche en Sciences de l'Ingénieur et Innovation (LaRSII)");
+        lab.setTitleEn("Laboratory of Research in Engineering Sciences and Innovation (LaRESI)");
+        lab.setAcronym("LaRESI");
+        lab.setUniversity("Université Sultan Moulay Slimane");
+        lab.setProgram("Programme de Structuration de la Recherche Scientifique");
+        lab.setEstablishment("Ecole Nationale des Sciences Appliquées de Beni Mellal (ENSA BM)");
+        lab.setPhone("212661 48 74 20");
+        lab.setEmail("r.allaoui@usms.ma");
         lab.setAccreditationStart(LocalDate.of(2026, 1, 1));
         lab.setAccreditationEnd(LocalDate.of(2029, 12, 31));
         return labRepository.save(lab);
     }
 
-    private Map<String, Member> seedMembers(JsonNode array, Lab lab, boolean associated, Role researcherRole) {
+    private Map<String, Member> seedMembers(List<MembreSeed> membres, Lab lab, boolean associe) {
         Map<String, Member> map = new HashMap<>();
-        if (!array.isArray()) return map;
-
-        for (JsonNode node : array) {
-            String fullName = text(node, "nom");
-            NameParts nameParts = splitName(fullName);
-            Member member = memberRepository.findByLabIdAndFirstNameIgnoreCaseAndLastNameIgnoreCase(lab.getId(), nameParts.firstName(), nameParts.lastName()).orElseGet(Member::new);
-
-            member.setLab(lab);
-            member.setFirstName(nameParts.firstName());
-            member.setLastName(nameParts.lastName());
-            member.setGrade(toGrade(text(node, "grade")));
-            member.setSpeciality(text(node, "specialite"));
-            member.setEstablishment(text(node, "etablissement"));
-            member.setAssociated(associated);
-            member.setRoleInLab(MemberRoleInLab.MEMBER);
-            member.setPhdStudents(toList(node.path("etudiants_doctorat")));
-
-            User linkedUser = seedUser(username(nameParts), defaultCin(nameParts), null, nameParts.firstName(), nameParts.lastName(), Set.of(researcherRole));
-            member.setUser(linkedUser);
-
+        for (MembreSeed seed : membres) {
+            NameParts nameParts = splitName(seed.nomComplet);
+            Member member = memberRepository.findByLaboratoireIdAndPrenomIgnoreCaseAndNomIgnoreCase(lab.getId(), nameParts.firstName(), nameParts.lastName()).orElseGet(Member::new);
+            member.setLaboratoire(lab);
+            member.setPrenom(nameParts.firstName());
+            member.setNom(nameParts.lastName());
+            member.setGrade(toGrade(seed.grade));
+            member.setSpecialite(seed.specialite);
+            member.setEtablissement(seed.etablissement);
+            member.setAssocie(associe);
+            member.setRoleDansLaboratoire(MemberRoleInLab.MEMBER);
+            member.setDoctorantsEncadres(new ArrayList<>(seed.doctorants));
             Member saved = memberRepository.save(member);
-            map.put(normalizeName(fullName), saved);
-        }
+            map.put(normalizeName(seed.nomComplet), saved);
 
+            seedUser(username(nameParts), defaultCin(nameParts), null, nameParts.firstName(), nameParts.lastName(), Set.of(createRoleIfMissing("RESEARCHER")));
+        }
         return map;
     }
 
-    private void assignDirection(JsonNode node, Map<String, Member> members, Lab lab) {
-        Member director = getOrCreateDirectionMember(node.path("directeur"), members, lab, MemberRoleInLab.DIRECTOR);
-        Member deputy = getOrCreateDirectionMember(node.path("directeur_adjoint"), members, lab, MemberRoleInLab.DEPUTY_DIRECTOR);
+    private void assignDirection(Lab lab, Map<String, Member> members) {
+        Member director = updateDirectionMember(lab, members.get(normalizeName("Allaoui Rabha")), "Allaoui Rabha", "PES", MemberRoleInLab.DIRECTOR);
+        Member deputy = updateDirectionMember(lab, members.get(normalizeName("El Alaoui Mohamed")), "El Alaoui Mohamed", "MCA", MemberRoleInLab.DEPUTY_DIRECTOR);
         lab.setDirector(director);
         lab.setDeputyDirector(deputy);
     }
 
-    private Member getOrCreateDirectionMember(JsonNode node, Map<String, Member> members, Lab lab, MemberRoleInLab role) {
-        String key = normalizeName(text(node, "nom"));
-        Member member = members.get(key);
+    private Member updateDirectionMember(Lab lab, Member member, String nomComplet, String grade, MemberRoleInLab role) {
         if (member == null) {
-            NameParts nameParts = splitName(text(node, "nom"));
+            NameParts p = splitName(nomComplet);
             member = new Member();
-            member.setLab(lab);
-            member.setFirstName(nameParts.firstName());
-            member.setLastName(nameParts.lastName());
-            member.setGrade(toGrade(text(node, "grade")));
+            member.setLaboratoire(lab);
+            member.setPrenom(p.firstName());
+            member.setNom(p.lastName());
+            member.setGrade(toGrade(grade));
         }
-        member.setRoleInLab(role);
+        member.setRoleDansLaboratoire(role);
         return memberRepository.save(member);
     }
 
-    private void seedComiteGestion(JsonNode array, Lab lab) {
-        if (!array.isArray()) return;
+    private void seedComiteGestion(Lab lab) {
         List<ComiteGestionMembre> comite = new ArrayList<>();
-        for (JsonNode node : array) {
-            ComiteGestionMembre membre = new ComiteGestionMembre();
-            membre.setNomEnseignant(text(node, "nom"));
-            membre.setRoleComite(text(node, "role"));
-            comite.add(membre);
-        }
+        comite.add(comite("Allaoui Rabha", "Président du conseil du Laboratoire"));
+        comite.add(comite("El Alaoui Mohamed", "Responsable documentation et RH"));
         lab.setComiteGestion(comite);
     }
 
-    private void seedThematiques(JsonNode array, Lab lab) {
-        if (!array.isArray()) return;
-        for (JsonNode n : array) {
-            String value = n.asText().trim();
-            if (value.isEmpty()) continue;
+    private ComiteGestionMembre comite(String nom, String role) {
+        ComiteGestionMembre membre = new ComiteGestionMembre();
+        membre.setNomEnseignant(nom);
+        membre.setRoleComite(role);
+        return membre;
+    }
+
+    private void seedThematiques(Lab lab) {
+        for (String value : List.of("Mathématiques – Informatique et Applications", "Physique et Applications")) {
             ResearchField field = researchFieldRepository.findByName(value).orElseGet(ResearchField::new);
             field.setName(value);
             researchFieldRepository.save(field);
@@ -166,11 +151,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
     }
 
-    private void seedAxes(JsonNode array, Lab lab) {
-        if (!array.isArray()) return;
-        for (JsonNode n : array) {
-            String value = n.asText().trim();
-            if (value.isEmpty()) continue;
+    private void seedAxes(Lab lab) {
+        for (String value : List.of("Énergie et efficacité énergétique", "Intelligence artificielle et science des données")) {
             ResearchItem item = new ResearchItem();
             item.setLab(lab);
             item.setTitle(value);
@@ -178,84 +160,77 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
     }
 
-    private void seedCompetences(JsonNode node, Lab lab) {
-        seedCompetenceByType(node.path("scientifiques_et_methodologiques"), lab, CompetenceType.SCIENTIFIC);
-        seedCompetenceByType(node.path("savoir_faire_technologique"), lab, CompetenceType.TECHNOLOGICAL);
-        seedCompetenceByType(node.path("sectorielles"), lab, CompetenceType.SECTORIAL);
-        seedCompetenceByType(node.path("innovation_et_transfert"), lab, CompetenceType.INNOVATION);
+    private void seedCompetences(Lab lab) {
+        seedCompetenceByType(List.of("Modélisation mathématique", "Simulation numérique"), lab, CompetenceType.SCIENTIFIC);
+        seedCompetenceByType(List.of("Développement de solutions smart cities"), lab, CompetenceType.TECHNOLOGICAL);
+        seedCompetenceByType(List.of("Agriculture numérique"), lab, CompetenceType.SECTORIAL);
+        seedCompetenceByType(List.of("Conception de projets collaboratifs R&D"), lab, CompetenceType.INNOVATION);
     }
 
-    private void seedCompetenceByType(JsonNode array, Lab lab, CompetenceType type) {
-        if (!array.isArray()) return;
-        for (JsonNode n : array) {
+    private void seedCompetenceByType(List<String> entries, Lab lab, CompetenceType type) {
+        for (String description : entries) {
             Competence c = new Competence();
             c.setLab(lab);
             c.setType(type);
-            c.setDescription(n.asText());
+            c.setDescription(description);
             competenceRepository.save(c);
         }
     }
 
-    private void seedEquipements(JsonNode node, Lab lab) {
-        seedEquipementByCategorie(node.path("scientifiques_laboratoire"), lab, EquipmentCategory.LAB);
-        seedEquipementByCategorie(node.path("dotations_universite"), lab, EquipmentCategory.UNIVERSITY);
-        seedEquipementByCategorie(node.path("etablissement_et_universite"), lab, EquipmentCategory.SHARED);
-        seedEquipementByCategorie(node.path("informatiques_laboratoire"), lab, EquipmentCategory.IT);
+    private void seedEquipements(Lab lab) {
+        seedEquipementByCategorie(List.of(), lab, EquipmentCategory.LAB);
+        seedEquipementByCategorie(List.of("Centre d'analyse de l'université"), lab, EquipmentCategory.UNIVERSITY);
+        seedEquipementByCategorie(List.of("Chromatographie en phase gazeuse", "Imprimante 3D technologie FDM"), lab, EquipmentCategory.SHARED);
+        seedEquipementByCategorie(List.of("Matériel de conception MOOCs"), lab, EquipmentCategory.IT);
     }
 
-    private void seedEquipementByCategorie(JsonNode array, Lab lab, EquipmentCategory category) {
-        if (!array.isArray()) return;
-        for (JsonNode n : array) {
+    private void seedEquipementByCategorie(List<String> entries, Lab lab, EquipmentCategory category) {
+        for (String name : entries) {
             Equipment e = new Equipment();
             e.setLab(lab);
             e.setCategory(category);
-            e.setName(n.asText());
+            e.setName(name);
             equipmentRepository.save(e);
         }
     }
 
-    private void seedCollaborations(JsonNode node, String etablissement) {
-        seedCollaborationsByScope(node.path("regionales"), etablissement, CollaborationScope.REGIONAL);
-        seedCollaborationsByScope(node.path("nationales"), etablissement, CollaborationScope.NATIONAL);
-        seedCollaborationsByScope(node.path("etrangeres"), etablissement, CollaborationScope.INTERNATIONAL);
+    private void seedCollaborations() {
+        seedCollaborationsByScope(List.of(collab("COSUMAR Oulad Ayad Beni Mellal", "Agro-alimentaire", "Stages de recherche")), CollaborationScope.REGIONAL);
+        seedCollaborationsByScope(List.of(collab("FST-Marrakech", "Mécanique, énergétique", "Recherche scientifique")), CollaborationScope.NATIONAL);
+        seedCollaborationsByScope(List.of(collab("Université de Nantes", "Informatique", "Recherche scientifique")), CollaborationScope.INTERNATIONAL);
     }
 
-    private void seedCollaborationsByScope(JsonNode array, String etablissement, CollaborationScope scope) {
-        if (!array.isArray()) return;
-        for (JsonNode n : array) {
+    private CollaborationSeed collab(String organisme, String thematique, String nature) { return new CollaborationSeed(organisme, thematique, nature); }
+
+    private void seedCollaborationsByScope(List<CollaborationSeed> entries, CollaborationScope scope) {
+        for (CollaborationSeed n : entries) {
             Collaboration c = new Collaboration();
-            c.setOrganization(text(n, "organisme"));
-            c.setEstablishment(etablissement);
-            c.setTheme(text(n, "thematique"));
-            c.setNature(text(n, "nature"));
+            c.setOrganization(n.organisme());
+            c.setEstablishment("Ecole Nationale des Sciences Appliquées de Beni Mellal (ENSA BM)");
+            c.setTheme(n.thematique());
+            c.setNature(n.nature());
             c.setScope(scope);
             collaborationRepository.save(c);
         }
     }
 
-    private void seedProduction(JsonNode node, Lab lab) {
+    private void seedProduction(Lab lab) {
         Production production = new Production();
         production.setLab(lab);
 
         Set<Publication> publications = new HashSet<>();
-        for (JsonNode n : node.path("publications")) {
-            publications.add(savePublication(n, PublicationType.JOURNAL, lab));
-        }
+        publications.add(savePublication(new PublicationSeed(List.of("Y. Elaouzy", "A. El Fadar"), "Building-integrated passive and renewable solar technologies", "Sustainable Energy Technologies and Assessments", null, null, null, 2024), PublicationType.JOURNAL, lab));
+        publications.add(savePublication(new PublicationSeed(List.of("Elbaghazaoui, Bahaa Eddine"), "Predicting the next word using the Markov chain model", "The Journal of Supercomputing", null, "10.1007/s11227-023-05125-2", null, 2023), PublicationType.JOURNAL, lab));
 
         Set<Publication> communications = new HashSet<>();
-        for (JsonNode n : node.path("communications")) {
-            communications.add(savePublication(n, PublicationType.COMMUNICATION, lab));
-        }
+        communications.add(savePublication(new PublicationSeed(List.of("A. Esswidi"), "Traffic congestion multilevel classification using deep learning", null, "ICRAMCS 2023", null, null, null), PublicationType.COMMUNICATION, lab));
 
-        Set<Thesis> theses = new HashSet<>();
-        for (JsonNode n : node.path("theses_soutenues")) {
-            Thesis t = new Thesis();
-            t.setLab(lab);
-            t.setAuthor(text(n, "auteur"));
-            t.setTitle(text(n, "titre"));
-            t.setSupervisor(text(n, "directeur"));
-            theses.add(thesisRepository.save(t));
-        }
+        Thesis t = new Thesis();
+        t.setLab(lab);
+        t.setAuthor("Ouassam Elhoucine");
+        t.setTitle("Méthodes Heuristiques et Intelligence Artificielle");
+        t.setSupervisor("Pr. Belaid Bouikhalene");
+        Set<Thesis> theses = Set.of(thesisRepository.save(t));
 
         production.setPublications(publications);
         production.setCommunications(communications);
@@ -263,17 +238,17 @@ public class DatabaseSeeder implements CommandLineRunner {
         productionRepository.save(production);
     }
 
-    private Publication savePublication(JsonNode n, PublicationType type, Lab lab) {
+    private Publication savePublication(PublicationSeed n, PublicationType type, Lab lab) {
         Publication p = new Publication();
         p.setLab(lab);
         p.setType(type);
-        p.setTitle(text(n, "titre"));
-        p.setPublicationYear(n.path("annee").isInt() ? n.path("annee").asInt() : null);
-        p.setAuthors(toList(n.path("auteurs")));
-        p.setJournal(text(n, "revue"));
-        p.setConference(text(n, "conference"));
-        p.setDoi(text(n, "doi"));
-        p.setPages(text(n, "pages"));
+        p.setTitle(n.titre());
+        p.setPublicationYear(n.annee());
+        p.setAuthors(n.auteurs());
+        p.setJournal(n.revue());
+        p.setConference(n.conference());
+        p.setDoi(n.doi());
+        p.setPages(n.pages());
         return publicationRepository.save(p);
     }
 
@@ -326,81 +301,19 @@ public class DatabaseSeeder implements CommandLineRunner {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
     }
 
-    private List<String> toList(JsonNode array) {
-        if (!array.isArray()) return new ArrayList<>();
-        List<String> values = new ArrayList<>();
-        for (JsonNode item : array) values.add(item.asText());
-        return values;
-    }
-
-    private String text(JsonNode node, String field) {
-        JsonNode value = node.path(field);
-        return value.isMissingNode() || value.isNull() ? null : value.asText();
-    }
-
     private record NameParts(String firstName, String lastName) {}
+    private record MembreSeed(String nomComplet, String grade, String specialite, String etablissement, List<String> doctorants) {}
+    private record CollaborationSeed(String organisme, String thematique, String nature) {}
+    private record PublicationSeed(List<String> auteurs, String titre, String revue, String conference, String doi, String pages, Integer annee) {}
 
-    // Keep JSON inline for easy edit/replacement later.
-    private static final String DATA_JSON = """
-            {
-              "laboratoire": {
-                "intitule_fr": "Laboratoire de Recherche en Sciences de l'Ingénieur et Innovation (LaRSII)",
-                "intitule_en": "Laboratory of Research in Engineering Sciences and Innovation (LaRESI)",
-                "acronyme": "LaRESI",
-                "universite": "Université Sultan Moulay Slimane",
-                "programme": "Programme de Structuration de la Recherche Scientifique",
-                "etablissement_domiciliation": "Ecole Nationale des Sciences Appliquées de Beni Mellal (ENSA BM)",
-                "telephone": "212661 48 74 20",
-                "email": "r.allaoui@usms.ma"
-              },
-              "direction": {
-                "directeur": {"nom": "Allaoui Rabha", "grade": "PES"},
-                "directeur_adjoint": {"nom": "El Alaoui Mohamed", "grade": "MCA"}
-              },
-              "comite_de_gestion": [
-                {"nom": "Allaoui Rabha", "grade": "PES", "role": "Président du conseil du Laboratoire"},
-                {"nom": "El Alaoui Mohamed", "grade": "MCA", "role": "Responsable documentation et RH"}
-              ],
-              "membres_principaux": [
-                {"nom":"Hidki Rachid","grade":"MCA","specialite":"Mécanique et énergétique","etablissement":"ENSA BM","etudiants_doctorat":[]},
-                {"nom":"Hassoune Abdelilah","grade":"MCA","specialite":"Génie Electrique","etablissement":"ENSA BM","etudiants_doctorat":[]},
-                {"nom":"Allaoui Rabha","grade":"PES","specialite":"Informatique","etablissement":"ENSA BM","etudiants_doctorat":["Bourzik Abdelaati"]},
-                {"nom":"El Alaoui Mohamed","grade":"MCA","specialite":"Génie Industriel","etablissement":"ENSA BM","etudiants_doctorat":[]}
-              ],
-              "membres_associes": [
-                {"nom":"Ouanan Hamid","grade":"MCH","specialite":"Génie informatique","etablissement":"ENSABM","etudiants_doctorat":[]}
-              ],
-              "thematiques_recherche": ["Mathématiques – Informatique et Applications", "Physique et Applications"],
-              "axes_recherche": ["Énergie et efficacité énergétique", "Intelligence artificielle et science des données"],
-              "competences": {
-                "scientifiques_et_methodologiques": ["Modélisation mathématique", "Simulation numérique"],
-                "savoir_faire_technologique": ["Développement de solutions smart cities"],
-                "sectorielles": ["Agriculture numérique"],
-                "innovation_et_transfert": ["Conception de projets collaboratifs R&D"]
-              },
-              "equipements": {
-                "scientifiques_laboratoire": [],
-                "dotations_universite": ["Centre d'analyse de l'université"],
-                "etablissement_et_universite": ["Chromatographie en phase gazeuse", "Imprimante 3D technologie FDM"],
-                "informatiques_laboratoire": ["Matériel de conception MOOCs"]
-              },
-              "collaborations": {
-                "regionales": [{"organisme":"COSUMAR Oulad Ayad Beni Mellal","thematique":"Agro-alimentaire","nature":"Stages de recherche"}],
-                "nationales": [{"organisme":"FST-Marrakech","thematique":"Mécanique, énergétique","nature":"Recherche scientifique"}],
-                "etrangeres": [{"organisme":"Université de Nantes","thematique":"Informatique","nature":"Recherche scientifique"}]
-              },
-              "production_scientifique_2021_2024": {
-                "publications": [
-                  {"auteurs":["Y. Elaouzy","A. El Fadar"],"titre":"Building-integrated passive and renewable solar technologies","revue":"Sustainable Energy Technologies and Assessments","annee":2024},
-                  {"auteurs":["Elbaghazaoui, Bahaa Eddine"],"titre":"Predicting the next word using the Markov chain model","revue":"The Journal of Supercomputing","annee":2023,"doi":"10.1007/s11227-023-05125-2"}
-                ],
-                "communications": [
-                  {"auteurs":["A. Esswidi"],"titre":"Traffic congestion multilevel classification using deep learning","conference":"ICRAMCS 2023"}
-                ],
-                "theses_soutenues": [
-                  {"auteur":"Ouassam Elhoucine","titre":"Méthodes Heuristiques et Intelligence Artificielle","directeur":"Pr. Belaid Bouikhalene"}
-                ]
-              }
-            }
-            """;
+    private static final List<MembreSeed> PRINCIPAL_MEMBRES = List.of(
+            new MembreSeed("Hidki Rachid", "MCA", "Mécanique et énergétique", "ENSA BM", List.of()),
+            new MembreSeed("Hassoune Abdelilah", "MCA", "Génie Electrique", "ENSA BM", List.of()),
+            new MembreSeed("Allaoui Rabha", "PES", "Informatique", "ENSA BM", List.of("Bourzik Abdelaati")),
+            new MembreSeed("El Alaoui Mohamed", "MCA", "Génie Industriel", "ENSA BM", List.of())
+    );
+
+    private static final List<MembreSeed> MEMBRES_ASSOCIES = List.of(
+            new MembreSeed("Ouanan Hamid", "MCH", "Génie informatique", "ENSABM", List.of())
+    );
 }
