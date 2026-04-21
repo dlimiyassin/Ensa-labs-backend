@@ -1,0 +1,7 @@
+package com.ensa.labs.research.dao;
+
+import com.ensa.labs.research.bean.Publication_Renamed;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PublicationRenamedRepository extends JpaRepository<Publication_Renamed, String> {
+}
