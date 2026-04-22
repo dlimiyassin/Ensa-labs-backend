@@ -8,6 +8,6 @@ public record ThesisDTO(
         String title,
         LocalDate defenseDate,
         String supervisor,
-        String labId
+        String labAcronym
 ) {
 }

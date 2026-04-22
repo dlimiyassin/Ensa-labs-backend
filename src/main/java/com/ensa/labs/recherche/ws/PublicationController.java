@@ -20,6 +20,9 @@ public class PublicationController {
     @GetMapping("/{id}")
     public PublicationDTO findById(@PathVariable String id) { return publicationService.findById(id); }
 
+    @GetMapping("/lab/{labAcronym}")
+    public List<PublicationDTO> findByLabAcronym(@PathVariable String labAcronym) { return publicationService.findByLabAcronym(labAcronym); }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PublicationDTO create(@RequestBody PublicationDTO dto) { return publicationService.create(dto); }

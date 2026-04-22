@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class MemberMapper {
     public MemberDTO toDto(Member member) {
         return new MemberDTO(member.getId(), member.getFirstName(), member.getLastName(), member.getGrade(), member.getSpeciality(), member.getEstablishment(),
-                member.isAssociated(), member.getRoleInLab(), member.getPhdStudents(), member.getLab() != null ? member.getLab().getId() : null,
+                member.getAssociationType(), member.getRoleInLab(), member.getPhdStudents(), member.getLab() != null ? member.getLab().getAcronym() : null,
                 member.getUser() != null ? member.getUser().getId() : null);
     }
 
@@ -22,7 +22,7 @@ public class MemberMapper {
         member.setGrade(dto.grade());
         member.setSpeciality(dto.speciality());
         member.setEstablishment(dto.establishment());
-        member.setAssociated(dto.associated());
+        member.setAssociationType(dto.associationType());
         member.setRoleInLab(dto.roleInLab());
         member.setPhdStudents(dto.phdStudents() == null ? new ArrayList<>() : new ArrayList<>(dto.phdStudents()));
         return member;

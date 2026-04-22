@@ -5,9 +5,9 @@ import java.util.List;
 public record EquipeDTO(
         String id,
         String name,
-        String labId,
-        String domaineRechercheId,
-        String responsableId,
-        List<String> memberIds
+        String labAcronym,
+        DomaineRechercheDTO domaineRecherche,
+        MemberDTO responsable,
+        List<MemberDTO> members
 ) {
 }

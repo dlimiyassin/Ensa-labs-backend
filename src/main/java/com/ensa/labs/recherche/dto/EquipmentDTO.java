@@ -6,6 +6,6 @@ public record EquipmentDTO(
         String id,
         String name,
         EquipmentCategory category,
-        String labId
+        String labAcronym
 ) {
 }

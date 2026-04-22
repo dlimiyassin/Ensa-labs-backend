@@ -20,6 +20,15 @@ public class LabController {
     @GetMapping("/{id}")
     public LabDTO findById(@PathVariable String id) { return labService.findById(id); }
 
+    @GetMapping("/acronym/{acronym}")
+    public LabDTO findByAcronym(@PathVariable String acronym) { return labService.findByAcronym(acronym); }
+
+    @GetMapping("/establishment/{establishment}")
+    public List<LabDTO> findByEstablishment(@PathVariable String establishment) { return labService.findByEstablishment(establishment); }
+
+    @GetMapping("/department/{departmentName}")
+    public List<LabDTO> findByDepartmentName(@PathVariable String departmentName) { return labService.findByDepartmentName(departmentName); }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public LabDTO create(@RequestBody LabDTO dto) { return labService.create(dto); }

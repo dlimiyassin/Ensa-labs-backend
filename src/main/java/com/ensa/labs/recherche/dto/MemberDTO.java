@@ -1,5 +1,6 @@
 package com.ensa.labs.recherche.dto;
 
+import com.ensa.labs.recherche.bean.enums.MemberAssociationType;
 import com.ensa.labs.recherche.bean.enums.MemberGrade;
 import com.ensa.labs.recherche.bean.enums.MemberRoleInLab;
 
@@ -12,10 +13,10 @@ public record MemberDTO(
         MemberGrade grade,
         String speciality,
         String establishment,
-        boolean associated,
+        MemberAssociationType associationType,
         MemberRoleInLab roleInLab,
         List<String> phdStudents,
-        String labId,
+        String labAcronym,
         String userId
 ) {
 }

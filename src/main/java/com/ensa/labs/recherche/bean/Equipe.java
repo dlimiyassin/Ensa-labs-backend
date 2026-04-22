@@ -1,6 +1,5 @@
 package com.ensa.labs.recherche.bean;
 
-import com.ensa.labs.zBase.security.bean.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,12 +29,12 @@ public class Equipe {
     private DomaineRecherche domaineRecherche;
 
     @ManyToMany
-    @JoinTable(name = "equipe_members", joinColumns = @JoinColumn(name = "equipe_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> members = new HashSet<>();
+    @JoinTable(name = "equipe_members", joinColumns = @JoinColumn(name = "equipe_id"), inverseJoinColumns = @JoinColumn(name = "member_id"))
+    private Set<Member> members = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "responsable_id")
-    private User responsable;
+    private Member responsable;
 
     @Override
     public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; Equipe equipe = (Equipe) o; return Objects.equals(id, equipe.id);}

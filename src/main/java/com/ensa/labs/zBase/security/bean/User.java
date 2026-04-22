@@ -1,6 +1,5 @@
 package com.ensa.labs.zBase.security.bean;
 
-import com.ensa.labs.recherche.bean.Equipe;
 import com.ensa.labs.zBase.security.bean.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -59,8 +58,6 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany(mappedBy = "members")
-    private Set<Equipe> equipes = new HashSet<>();
 
     public User() {
     }

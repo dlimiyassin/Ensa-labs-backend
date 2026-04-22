@@ -20,6 +20,9 @@ public class EquipeController {
     @GetMapping("/{id}")
     public EquipeDTO findById(@PathVariable String id) { return equipeService.findById(id); }
 
+    @GetMapping("/lab/{labAcronym}")
+    public List<EquipeDTO> findByLabAcronym(@PathVariable String labAcronym) { return equipeService.findByLabAcronym(labAcronym); }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EquipeDTO create(@RequestBody EquipeDTO dto) { return equipeService.create(dto); }

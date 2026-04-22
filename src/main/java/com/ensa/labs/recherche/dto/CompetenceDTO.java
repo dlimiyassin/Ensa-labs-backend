@@ -6,6 +6,6 @@ public record CompetenceDTO(
         String id,
         String description,
         CompetenceType type,
-        String labId
+        String labAcronym
 ) {
 }

@@ -1,6 +1,5 @@
 package com.ensa.labs.recherche.mapper;
 
-import com.ensa.labs.recherche.bean.ComiteGestionMembre;
 import com.ensa.labs.recherche.bean.Lab;
 import com.ensa.labs.recherche.dto.LabDTO;
 import org.springframework.stereotype.Component;
@@ -9,6 +8,39 @@ import java.util.ArrayList;
 
 @Component
 public class LabMapper {
+    private final MemberMapper memberMapper;
+    private final ComiteGestionMapper comiteGestionMapper;
+    private final DomaineRechercheMapper domaineRechercheMapper;
+    private final AxeRechercheMapper axeRechercheMapper;
+    private final EquipmentMapper equipmentMapper;
+    private final CompetenceMapper competenceMapper;
+    private final ProductionMapper productionMapper;
+    private final DepartmentMapper departmentMapper;
+    private final EquipeMapper equipeMapper;
+    private final TagMapper tagMapper;
+
+    public LabMapper(MemberMapper memberMapper,
+                     ComiteGestionMapper comiteGestionMapper,
+                     DomaineRechercheMapper domaineRechercheMapper,
+                     AxeRechercheMapper axeRechercheMapper,
+                     EquipmentMapper equipmentMapper,
+                     CompetenceMapper competenceMapper,
+                     ProductionMapper productionMapper,
+                     DepartmentMapper departmentMapper,
+                     EquipeMapper equipeMapper,
+                     TagMapper tagMapper) {
+        this.memberMapper = memberMapper;
+        this.comiteGestionMapper = comiteGestionMapper;
+        this.domaineRechercheMapper = domaineRechercheMapper;
+        this.axeRechercheMapper = axeRechercheMapper;
+        this.equipmentMapper = equipmentMapper;
+        this.competenceMapper = competenceMapper;
+        this.productionMapper = productionMapper;
+        this.departmentMapper = departmentMapper;
+        this.equipeMapper = equipeMapper;
+        this.tagMapper = tagMapper;
+    }
+
     public LabDTO toDto(Lab lab) {
         return new LabDTO(
                 lab.getId(),
@@ -22,18 +54,18 @@ public class LabMapper {
                 lab.getEstablishment(),
                 lab.getPhone(),
                 lab.getEmail(),
-                lab.getDirecteur() != null ? lab.getDirecteur().getId() : null,
-                lab.getDirecteurAdjoint() != null ? lab.getDirecteurAdjoint().getId() : null,
-                lab.getMembers().stream().map(m -> m.getId()).toList(),
-                lab.getComiteGestion().stream().map(ComiteGestionMembre::getNomEnseignant).toList(),
-                lab.getDomainesRecherche().stream().map(r -> r.getName()).toList(),
-                lab.getAxesRecherche().stream().map(r -> r.getTitle()).toList(),
-                lab.getEquipments().stream().map(e -> e.getId()).toList(),
-                lab.getCompetences().stream().map(c -> c.getId()).toList(),
-                lab.getProduction() != null ? lab.getProduction().getId() : null,
-                lab.getDepartment() != null ? lab.getDepartment().getName() : null,
-                lab.getEquipes().stream().map(t -> t.getId()).toList(),
-                lab.getTags().stream().map(t -> t.getName()).toList()
+                lab.getDirecteur() != null ? memberMapper.toDto(lab.getDirecteur()) : null,
+                lab.getDirecteurAdjoint() != null ? memberMapper.toDto(lab.getDirecteurAdjoint()) : null,
+                lab.getMembers().stream().map(memberMapper::toDto).toList(),
+                lab.getComiteGestion().stream().map(comiteGestionMapper::toDto).toList(),
+                lab.getDomainesRecherche().stream().map(domaineRechercheMapper::toDto).toList(),
+                lab.getAxesRecherche().stream().map(axeRechercheMapper::toDto).toList(),
+                lab.getEquipments().stream().map(equipmentMapper::toDto).toList(),
+                lab.getCompetences().stream().map(competenceMapper::toDto).toList(),
+                lab.getProduction() != null ? productionMapper.toDto(lab.getProduction()) : null,
+                lab.getDepartment() != null ? departmentMapper.toDto(lab.getDepartment()) : null,
+                lab.getEquipes().stream().map(equipeMapper::toDto).toList(),
+                lab.getTags().stream().map(tagMapper::toDto).toList()
         );
     }
 

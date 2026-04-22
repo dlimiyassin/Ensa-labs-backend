@@ -1,7 +1,6 @@
 package com.ensa.labs.recherche.service;
 
 import com.ensa.labs.exception.ResourceNotFoundException;
-import com.ensa.labs.recherche.dao.EquipeRepository;
 import com.ensa.labs.recherche.dto.UserDTO;
 import com.ensa.labs.recherche.mapper.UserMapper;
 import com.ensa.labs.zBase.security.bean.User;
@@ -17,14 +16,12 @@ import java.util.List;
 public class UserManagementService {
     private final UserDao userDao;
     private final RoleDao roleDao;
-    private final EquipeRepository equipeRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    public UserManagementService(UserDao userDao, RoleDao roleDao, EquipeRepository equipeRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public UserManagementService(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userDao = userDao;
         this.roleDao = roleDao;
-        this.equipeRepository = equipeRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
     }
@@ -61,8 +58,6 @@ public class UserManagementService {
 
     private void applyRelations(User user, UserDTO dto) {
         user.setRoles(new HashSet<>(dto.roleIds().stream().map(roleId -> roleDao.findById(roleId).orElseThrow(() -> new ResourceNotFoundException("Role", "id", roleId))).toList()));
-        user.setEquipes(new HashSet<>(dto.equipeIds().stream().map(teamId -> equipeRepository.findById(teamId).orElseThrow(() -> new ResourceNotFoundException("Equipe", "id", teamId))).toList()));
-        user.getEquipes().forEach(team -> team.getMembers().add(user));
     }
 
     private User get(String id) { return userDao.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id)); }

@@ -2,9 +2,9 @@ package com.ensa.labs.recherche.service;
 
 import com.ensa.labs.exception.ResourceNotFoundException;
 import com.ensa.labs.recherche.bean.Publication;
+import com.ensa.labs.recherche.dao.EquipeRepository;
 import com.ensa.labs.recherche.dao.LabRepository;
 import com.ensa.labs.recherche.dao.PublicationRepository;
-import com.ensa.labs.recherche.dao.EquipeRepository;
 import com.ensa.labs.recherche.dto.PublicationDTO;
 import com.ensa.labs.recherche.mapper.PublicationMapper;
 import org.springframework.stereotype.Service;
@@ -28,6 +28,7 @@ public class PublicationService {
 
     public List<PublicationDTO> findAll() { return publicationRepository.findAll().stream().map(publicationMapper::toDto).toList(); }
     public PublicationDTO findById(String id) { return publicationMapper.toDto(get(id)); }
+    public List<PublicationDTO> findByLabAcronym(String acronym) { return publicationRepository.findByLabAcronym(acronym).stream().map(publicationMapper::toDto).toList(); }
 
     public PublicationDTO create(PublicationDTO dto) {
         Publication publication = publicationMapper.toEntity(dto);
@@ -52,7 +53,7 @@ public class PublicationService {
     public void delete(String id) { publicationRepository.delete(get(id)); }
 
     private void applyRelations(Publication publication, PublicationDTO dto) {
-        publication.setLab(labRepository.findById(dto.labId()).orElseThrow(() -> new ResourceNotFoundException("Lab", "id", dto.labId())));
+        publication.setLab(labRepository.findByAcronym(dto.labAcronym()).orElseThrow(() -> new ResourceNotFoundException("Lab", "acronym", dto.labAcronym())));
         publication.setEquipe(dto.equipeId() == null ? null : equipeRepository.findById(dto.equipeId()).orElseThrow(() -> new ResourceNotFoundException("Equipe", "id", dto.equipeId())));
     }
 
