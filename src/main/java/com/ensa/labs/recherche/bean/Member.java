@@ -1,5 +1,6 @@
 package com.ensa.labs.recherche.bean;
 
+import com.ensa.labs.recherche.bean.enums.MemberAssociationType;
 import com.ensa.labs.recherche.bean.enums.MemberGrade;
 import com.ensa.labs.recherche.bean.enums.MemberRoleInLab;
 import com.ensa.labs.zBase.security.bean.User;
@@ -33,7 +34,9 @@ public class Member {
 
     private String establishment;
 
-    private boolean associated;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MemberAssociationType associationType = MemberAssociationType.PERMENANET;
 
     @Enumerated(EnumType.STRING)
     private MemberRoleInLab roleInLab = MemberRoleInLab.MEMBER;

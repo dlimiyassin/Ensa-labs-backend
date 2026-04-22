@@ -14,7 +14,7 @@ public record PublicationDTO(
         String conference,
         String doi,
         String pages,
-        String labId,
+        String labAcronym,
         String equipeId
 ) {
 }

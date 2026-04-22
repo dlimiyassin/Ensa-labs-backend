@@ -14,7 +14,6 @@ public record UserDTO(
         String phoneNumber,
         boolean enabled,
         UserStatus status,
-        List<String> roleIds,
-        List<String> equipeIds
+        List<String> roleIds
 ) {
 }

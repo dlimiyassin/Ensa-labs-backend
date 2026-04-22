@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
     public UserDTO toDto(User user) {
         return new UserDTO(user.getId(), user.getUsername(), user.getCin(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhoneNumber(), user.isEnabled(), user.getStatus(),
-                user.getRoles().stream().map(r -> r.getId()).toList(),
-                user.getEquipes().stream().map(t -> t.getId()).toList());
+                user.getRoles().stream().map(r -> r.getId()).toList());
     }
 
     public User toEntity(UserDTO dto) {

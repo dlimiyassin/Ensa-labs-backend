@@ -1,9 +1,7 @@
 package com.ensa.labs.recherche.service;
 
 import com.ensa.labs.exception.ResourceNotFoundException;
-import com.ensa.labs.recherche.bean.ComiteGestionMembre;
 import com.ensa.labs.recherche.bean.Lab;
-import com.ensa.labs.recherche.bean.Member;
 import com.ensa.labs.recherche.dao.*;
 import com.ensa.labs.recherche.dto.LabDTO;
 import com.ensa.labs.recherche.mapper.LabMapper;
@@ -33,6 +31,9 @@ public class LabService {
 
     public List<LabDTO> findAll() { return labRepository.findAll().stream().map(labMapper::toDto).toList(); }
     public LabDTO findById(String id) { return labMapper.toDto(get(id)); }
+    public LabDTO findByAcronym(String acronym) { return labMapper.toDto(getByAcronym(acronym)); }
+    public List<LabDTO> findByEstablishment(String establishment) { return labRepository.findByEstablishmentIgnoreCase(establishment).stream().map(labMapper::toDto).toList(); }
+    public List<LabDTO> findByDepartmentName(String departmentName) { return labRepository.findByDepartmentNameIgnoreCase(departmentName).stream().map(labMapper::toDto).toList(); }
 
     public LabDTO create(LabDTO dto) {
         Lab lab = labMapper.toEntity(dto);
@@ -59,33 +60,34 @@ public class LabService {
     public void delete(String id) { labRepository.delete(get(id)); }
 
     private void applyRelations(Lab lab, LabDTO dto) {
-        if (dto.departmentId() != null) {
-            lab.setDepartment(departmentRepository.findById(dto.departmentId()).orElseThrow(() -> new ResourceNotFoundException("Department", "id", dto.departmentId())));
+        if (dto.department() != null && dto.department().id() != null) {
+            lab.setDepartment(departmentRepository.findById(dto.department().id()).orElseThrow(() -> new ResourceNotFoundException("Department", "id", dto.department().id())));
         }
-        if (dto.domaineRechercheIds() != null) {
-            lab.setDomainesRecherche(new HashSet<>(dto.domaineRechercheIds().stream().map(id -> domaineRechercheRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("DomaineRecherche", "id", id))).toList()));
+        if (dto.domainesRecherche() != null) {
+            lab.setDomainesRecherche(new HashSet<>(dto.domainesRecherche().stream()
+                    .filter(d -> d.id() != null)
+                    .map(d -> domaineRechercheRepository.findById(d.id()).orElseThrow(() -> new ResourceNotFoundException("DomaineRecherche", "id", d.id())))
+                    .toList()));
         }
-        if (dto.tagIds() != null) {
-            lab.setTags(new HashSet<>(dto.tagIds().stream().map(id -> tagRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tag", "id", id))).toList()));
+        if (dto.tags() != null) {
+            lab.setTags(new HashSet<>(dto.tags().stream()
+                    .filter(t -> t.id() != null)
+                    .map(t -> tagRepository.findById(t.id()).orElseThrow(() -> new ResourceNotFoundException("Tag", "id", t.id())))
+                    .toList()));
         }
-        lab.setDirecteur(resolveMember(dto.directeurId()));
-        lab.setDirecteurAdjoint(resolveMember(dto.directeurAdjointId()));
+        lab.setDirecteur(dto.directeur() == null || dto.directeur().id() == null ? null : memberRepository.findById(dto.directeur().id()).orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.directeur().id())));
+        lab.setDirecteurAdjoint(dto.directeurAdjoint() == null || dto.directeurAdjoint().id() == null ? null : memberRepository.findById(dto.directeurAdjoint().id()).orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.directeurAdjoint().id())));
 
-        if (dto.comiteGestionNoms() != null) {
-            List<ComiteGestionMembre> list = new ArrayList<>();
-            for (String nom : dto.comiteGestionNoms()) {
-                ComiteGestionMembre membre = new ComiteGestionMembre();
-                membre.setNomEnseignant(nom);
-                membre.setRoleComite("Membre du comité");
-                list.add(membre);
-            }
-            lab.setComiteGestion(list);
+        if (dto.comiteGestion() != null) {
+            lab.setComiteGestion(new ArrayList<>(dto.comiteGestion().stream().map(c -> {
+                var membre = new com.ensa.labs.recherche.bean.ComiteGestionMembre();
+                membre.setNomEnseignant(c.nomEnseignant());
+                membre.setRoleComite(c.roleComite());
+                return membre;
+            }).toList()));
         }
-    }
-
-    private Member resolveMember(String memberId) {
-        return memberId == null ? null : memberRepository.findById(memberId).orElseThrow(() -> new ResourceNotFoundException("Member", "id", memberId));
     }
 
     private Lab get(String id) { return labRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Lab", "id", id)); }
+    private Lab getByAcronym(String acronym) { return labRepository.findByAcronym(acronym).orElseThrow(() -> new ResourceNotFoundException("Lab", "acronym", acronym)); }
 }
