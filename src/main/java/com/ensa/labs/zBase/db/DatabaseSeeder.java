@@ -45,10 +45,10 @@ public class DatabaseSeeder implements CommandLineRunner {
     public void run(String... args) {
 
         var roles = roleSeeder.seed();
-        var lab = labSeeder.seed();
-
         var admin = userSeeder.seedAdmin(roles);
-        var members = memberSeeder.seed(lab, roles);
+        var members = memberSeeder.seed(roles);
+
+        var lab = labSeeder.seed();
 
         researchSeeder.seed(lab);
         competenceSeeder.seed(lab);

@@ -46,7 +46,7 @@ public class Member {
     @Column(name = "phd_student")
     private List<String> phdStudents = new ArrayList<>();
 
-    @ManyToOne(optional = false)
+    @ManyToOne()
     @JoinColumn(name = "lab_id")
     private Lab lab;
 

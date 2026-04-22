@@ -1,5 +1,7 @@
 package com.ensa.labs.zBase.db.data;
 
+import com.ensa.labs.recherche.bean.enums.MemberRoleInLab;
+
 import java.util.List;
 
 public class LabData {
@@ -12,10 +14,10 @@ public class LabData {
 
     // ================= MEMBERS =================
     public static final List<MemberData> MAIN_MEMBERS = List.of(
-            new MemberData("Hidki", "Rachid", "MCA", "Mécanique et énergétique", "ENSA BM"),
-            new MemberData("Hassoune", "Abdelilah", "MCA", "Génie Electrique", "ENSA BM"),
-            new MemberData("Allaoui", "Rabha", "PES", "Informatique", "ENSA BM"),
-            new MemberData("El Alaoui", "Mohamed", "MCA", "Génie Industriel", "ENSA BM")
+            new MemberData("Hidki", "Rachid", "MCA", "Mécanique et énergétique", "ENSA BM", MemberRoleInLab.MEMBER),
+            new MemberData("Hassoune", "Abdelilah", "MCA", "Génie Electrique", "ENSA BM",MemberRoleInLab.MEMBER),
+            new MemberData("Allaoui", "Rabha", "PES", "Informatique", "ENSA BM",MemberRoleInLab.DIRECTEUR),
+            new MemberData("El Alaoui", "Mohamed", "MCA", "Génie Industriel", "ENSA BM",MemberRoleInLab.DIRECTEUR_ADJOINT)
     );
 
     // ================= RESEARCH =================

@@ -26,7 +26,7 @@ public class MemberSeeder {
         this.userSeeder = userSeeder;
     }
 
-    public Map<String, Member> seed(Lab lab, Map<String, Role> roles) {
+    public Map<String, Member> seed(Map<String, Role> roles) {
 
         Map<String, Member> members = new HashMap<>();
 
@@ -48,13 +48,13 @@ public class MemberSeeder {
             }
 
             // Update fields (safe for reruns)
-            member.setLab(lab);
+            // member.setLab(lab);
             member.setFirstName(data.firstName());
             member.setLastName(data.lastName());
             member.setSpeciality(data.speciality());
             member.setEstablishment(data.establishment());
             member.setGrade(MemberGrade.valueOf(data.grade()));
-            member.setRoleInLab(MemberRoleInLab.MEMBER);
+            member.setRoleInLab(data.memberRoleInLab());
 
             Member saved = memberRepository.save(member);
 
