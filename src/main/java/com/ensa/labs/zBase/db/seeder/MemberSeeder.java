@@ -55,10 +55,12 @@ public class MemberSeeder {
             member.setEstablishment(data.establishment());
             member.setGrade(MemberGrade.valueOf(data.grade()));
             member.setRoleInLab(data.memberRoleInLab());
+            member.setAssociationType(data.associationType());
+            member.setPhdStudents(data.phdStudents());
 
             Member saved = memberRepository.save(member);
 
-            members.put(data.firstName() + data.lastName(), saved);
+            members.put(data.firstName() + " " + data.lastName(), saved);
         }
 
         return members;

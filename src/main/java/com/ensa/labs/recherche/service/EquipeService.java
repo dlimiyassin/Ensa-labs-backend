@@ -1,8 +1,9 @@
 package com.ensa.labs.recherche.service;
 
 import com.ensa.labs.exception.ResourceNotFoundException;
+import com.ensa.labs.recherche.bean.AxeRecherche;
 import com.ensa.labs.recherche.bean.Equipe;
-import com.ensa.labs.recherche.dao.DomaineRechercheRepository;
+import com.ensa.labs.recherche.dao.AxeRechercheRepository;
 import com.ensa.labs.recherche.dao.EquipeRepository;
 import com.ensa.labs.recherche.dao.LabRepository;
 import com.ensa.labs.recherche.dao.MemberRepository;
@@ -17,14 +18,14 @@ import java.util.List;
 public class EquipeService {
     private final EquipeRepository equipeRepository;
     private final LabRepository labRepository;
-    private final DomaineRechercheRepository domaineRechercheRepository;
+    private final AxeRechercheRepository axeRechercheRepository;
     private final MemberRepository memberRepository;
     private final EquipeMapper equipeMapper;
 
-    public EquipeService(EquipeRepository equipeRepository, LabRepository labRepository, DomaineRechercheRepository domaineRechercheRepository, MemberRepository memberRepository, EquipeMapper equipeMapper) {
+    public EquipeService(EquipeRepository equipeRepository, LabRepository labRepository, AxeRechercheRepository axeRechercheRepository, MemberRepository memberRepository, EquipeMapper equipeMapper) {
         this.equipeRepository = equipeRepository;
         this.labRepository = labRepository;
-        this.domaineRechercheRepository = domaineRechercheRepository;
+        this.axeRechercheRepository = axeRechercheRepository;
         this.memberRepository = memberRepository;
         this.equipeMapper = equipeMapper;
     }
@@ -50,9 +51,15 @@ public class EquipeService {
 
     private void applyRelations(Equipe equipe, EquipeDTO dto) {
         equipe.setLab(labRepository.findByAcronym(dto.labAcronym()).orElseThrow(() -> new ResourceNotFoundException("Lab", "acronym", dto.labAcronym())));
-        if (dto.domaineRecherche() != null && dto.domaineRecherche().id() != null) {
-            equipe.setDomaineRecherche(domaineRechercheRepository.findById(dto.domaineRecherche().id()).orElseThrow(() -> new ResourceNotFoundException("DomaineRecherche", "id", dto.domaineRecherche().id())));
-        }
+        var axes = dto.axesRecherche() == null ? new HashSet<AxeRecherche>() : new HashSet<>(dto.axesRecherche().stream()
+                .filter(a -> a.id() != null)
+                .map(a -> axeRechercheRepository.findById(a.id()).orElseThrow(() -> new ResourceNotFoundException("AxeRecherche", "id", a.id())))
+                .toList());
+        axes.forEach(a -> {
+            a.setEquipe(equipe);
+            a.setLab(null);
+        });
+        equipe.setAxesRecherche(axes);
         equipe.setResponsable(dto.responsable() == null || dto.responsable().id() == null ? null : memberRepository.findById(dto.responsable().id()).orElseThrow(() -> new ResourceNotFoundException("Member", "id", dto.responsable().id())));
         equipe.setMembers(dto.members() == null ? new HashSet<>() : new HashSet<>(dto.members().stream()
                 .filter(m -> m.id() != null)

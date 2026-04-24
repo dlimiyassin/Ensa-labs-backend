@@ -18,9 +18,13 @@ public class AxeRecherche {
     @Column(nullable = false, length = 1000)
     private String title;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "lab_id")
     private Lab lab;
+
+    @ManyToOne
+    @JoinColumn(name = "equipe_id")
+    private Equipe equipe;
 
     @Override
     public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; AxeRecherche that = (AxeRecherche) o; return Objects.equals(id, that.id);}

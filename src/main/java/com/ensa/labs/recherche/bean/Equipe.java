@@ -24,9 +24,8 @@ public class Equipe {
     @JoinColumn(name = "lab_id")
     private Lab lab;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "domaine_recherche_id")
-    private DomaineRecherche domaineRecherche;
+    @OneToMany(mappedBy = "equipe")
+    private Set<AxeRecherche> axesRecherche = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "equipe_members", joinColumns = @JoinColumn(name = "equipe_id"), inverseJoinColumns = @JoinColumn(name = "member_id"))
