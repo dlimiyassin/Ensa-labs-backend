@@ -6,7 +6,7 @@ public record EquipeDTO(
         String id,
         String name,
         String labAcronym,
-        DomaineRechercheDTO domaineRecherche,
+        List<AxeRechercheDTO> axesRecherche,
         MemberDTO responsable,
         List<MemberDTO> members
 ) {

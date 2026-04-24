@@ -6,18 +6,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EquipeMapper {
-    private final DomaineRechercheMapper domaineRechercheMapper;
+    private final AxeRechercheMapper axeRechercheMapper;
     private final MemberMapper memberMapper;
 
-    public EquipeMapper(DomaineRechercheMapper domaineRechercheMapper, MemberMapper memberMapper) {
-        this.domaineRechercheMapper = domaineRechercheMapper;
+    public EquipeMapper(AxeRechercheMapper axeRechercheMapper, MemberMapper memberMapper) {
+        this.axeRechercheMapper = axeRechercheMapper;
         this.memberMapper = memberMapper;
     }
 
     public EquipeDTO toDto(Equipe equipe) {
         return new EquipeDTO(equipe.getId(), equipe.getName(),
                 equipe.getLab() != null ? equipe.getLab().getAcronym() : null,
-                equipe.getDomaineRecherche() != null ? domaineRechercheMapper.toDto(equipe.getDomaineRecherche()) : null,
+                equipe.getAxesRecherche().stream().map(axeRechercheMapper::toDto).toList(),
                 equipe.getResponsable() != null ? memberMapper.toDto(equipe.getResponsable()) : null,
                 equipe.getMembers().stream().map(memberMapper::toDto).toList());
     }

@@ -17,6 +17,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final EquipmentSeeder equipmentSeeder;
     private final CollaborationSeeder collaborationSeeder;
     private final ProductionSeeder productionSeeder;
+    private final EquipeSeeder equipeSeeder;
 
     public DatabaseSeeder(
             RoleSeeder roleSeeder,
@@ -27,7 +28,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             CompetenceSeeder competenceSeeder,
             EquipmentSeeder equipmentSeeder,
             CollaborationSeeder collaborationSeeder,
-            ProductionSeeder productionSeeder
+            ProductionSeeder productionSeeder,
+            EquipeSeeder equipeSeeder
     ) {
         this.roleSeeder = roleSeeder;
         this.userSeeder = userSeeder;
@@ -38,6 +40,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.equipmentSeeder = equipmentSeeder;
         this.collaborationSeeder = collaborationSeeder;
         this.productionSeeder = productionSeeder;
+        this.equipeSeeder = equipeSeeder;
     }
 
     @Override
@@ -48,12 +51,14 @@ public class DatabaseSeeder implements CommandLineRunner {
         var admin = userSeeder.seedAdmin(roles);
         var members = memberSeeder.seed(roles);
 
-        var lab = labSeeder.seed();
-
-        researchSeeder.seed(lab);
-        competenceSeeder.seed(lab);
-        equipmentSeeder.seed(lab);
-        collaborationSeeder.seed(lab);
-        productionSeeder.seed(lab);
+        var labs = labSeeder.seed();
+        for (var lab : labs) {
+            researchSeeder.seed(lab);
+            competenceSeeder.seed(lab);
+            equipmentSeeder.seed(lab);
+            collaborationSeeder.seed(lab);
+            productionSeeder.seed(lab);
+            equipeSeeder.seed(lab);
+        }
     }
 }

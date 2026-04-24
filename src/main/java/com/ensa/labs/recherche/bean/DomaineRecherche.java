@@ -23,9 +23,6 @@ public class DomaineRecherche {
     @ManyToMany(mappedBy = "domainesRecherche")
     private Set<Lab> labs = new HashSet<>();
 
-    @OneToMany(mappedBy = "domaineRecherche")
-    private Set<Equipe> equipes = new HashSet<>();
-
     @Override
     public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; DomaineRecherche that = (DomaineRecherche) o; return Objects.equals(id, that.id);}
     @Override
