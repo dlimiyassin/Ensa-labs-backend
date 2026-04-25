@@ -11,6 +11,7 @@ import com.ensa.labs.zBase.security.bean.Role;
 import com.ensa.labs.zBase.security.bean.User;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -56,7 +57,11 @@ public class MemberSeeder {
             member.setGrade(MemberGrade.valueOf(data.grade()));
             member.setRoleInLab(data.memberRoleInLab());
             member.setAssociationType(data.associationType());
-            member.setPhdStudents(data.phdStudents());
+            member.setPhdStudents(
+                    data.phdStudents() == null
+                            ? new ArrayList<>()
+                            : new ArrayList<>(data.phdStudents())
+            );
 
             Member saved = memberRepository.save(member);
 

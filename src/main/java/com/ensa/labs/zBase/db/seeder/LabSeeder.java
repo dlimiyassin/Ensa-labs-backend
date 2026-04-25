@@ -36,7 +36,7 @@ public class LabSeeder {
 
         return LabData.LABS.stream()
                 .map(seed -> upsertLab(seed, allMembers))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private Lab upsertLab(LabData.LabSeed seed, List<Member> allMembers) {
@@ -78,7 +78,7 @@ public class LabSeeder {
                     m.setRoleComite(role);
                     return m;
                 }))
-                .toList();
+                .collect(Collectors.toList());
         lab.setComiteGestion(comite);
 
         Lab savedLab = labRepository.save(lab);
