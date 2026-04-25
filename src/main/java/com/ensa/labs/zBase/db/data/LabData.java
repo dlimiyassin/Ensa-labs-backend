@@ -25,6 +25,7 @@ public class LabData {
             String department,
             String directeurFullName,
             String directeurAdjointFullName,
+            List<String> demainesRecherche,
             List<String> axesRecherche,
             List<ComiteRoleData> comiteGestion,
             List<EquipeSeed> equipes
@@ -47,7 +48,54 @@ public class LabData {
                     "Informatique",
                     "Allaoui Rabha",
                     "El Alaoui Mohamed",
-                    List.of(),
+                    List.of(
+                            "Mathématiques – Informatique et Applications",
+                            "Physique et Applications",
+                            "Optimisation et modélisation avancée",
+                            "Analyse de données et Big Data",
+                            "Intelligence artificielle et intelligence artificielle générative",
+                            "Architecture des systèmes informatiques modernes",
+                            "Transformation digitale et e-gouvernance",
+                            "Industrie 4.0",
+                            "Internet des objets (IoT)",
+                            "Robotique et systèmes autonomes",
+                            "Smart Grids et automatisation industrielle",
+                            "Systèmes intelligents et ingénierie des systèmes avancés",
+                            "Agriculture digitale et optimisation agricole par l’IA",
+                            "E-learning et pédagogie numérique",
+                            "Sciences éducatives et communication scientifique"
+                    ),
+                    List.of(
+                            "Énergie et efficacité énergétique",
+                            "Énergies alternatives et renouvelables",
+                            "Mobilité électrique",
+                            "Physique appliquée",
+                            "Physique médicale",
+                            "Automatique et automatisme",
+                            "Smart Grids et automatisation des systèmes énergétiques",
+                            "Dessalement de l’eau et de l’eau de mer",
+                            "Propriétés des matériaux",
+                            "Modélisation des systèmes énergétiques",
+                            "Modélisation numérique et physique des systèmes",
+                            "Systèmes d'information et bases de données",
+                            "Internet des objets (IoT)",
+                            "Apprentissage automatique (machine learning)",
+                            "Optimisation des systèmes industriels et techniques",
+                            "Mobilité intelligente et innovation urbaine",
+                            "Gaming et pédagogie éducative",
+                            "Systèmes et réseaux intelligents",
+                            "Dessalement de l’eau (modélisation de procédés)",
+                            "Cybersécurité, systèmes et réseaux",
+                            "Intelligence artificielle et science des données",
+                            "Analyse numérique",
+                            "Analyse de Fourier, harmonique et équations fonctionnelles",
+                            "Big Data et architecture moderne",
+                            "Smart Cities",
+                            "Technologies d’impression 3D et prototypage rapide",
+                            "Transformation digitale",
+                            "E-learning et pédagogie numérique",
+                            "Métiers du numérique et technologies émergentes"
+                    ),
                     List.of(
                             new ComiteRoleData("Allaoui Rabha", List.of(
                                     "Président du conseil du Laboratoire",
@@ -74,8 +122,46 @@ public class LabData {
                     "Informatique",
                     "Soufiane Belhouideg",
                     "Aziz Hirri",
+                    List.of(
+                            "Physique appliquée et applications industrielles",
+                            "Optimisation, modélisation et simulation avancée",
+                            "Industrie 4.0 et transformation digitale",
+                            "Internet des objets (IoT) et systèmes connectés",
+                            "Robotique, mécatronique et systèmes autonomes",
+                            "Smart Grids et automatisation industrielle",
+                            "Systèmes intelligents et ingénierie des systèmes avancés",
+                            "Agriculture digitale et optimisation agricole par l’intelligence artificielle",
+                            "Agronomie et gestion durable des ressources naturelles",
+                            "Biotechnologies microbiennes appliquées à l’agriculture et à l’agroalimentaire",
+                            "Valorisation des plantes aromatiques et médicinales",
+                            "Étude et valorisation des microorganismes des biotopes marocains",
+                            "Aliments fonctionnels, nutrition et santé",
+                            "Sciences des arômes, formulation et évaluation sensorielle des produits alimentaires",
+                            "Astronomie et astrophysique",
+                            "Chimiométrie et agroalimentaire"
+                    ),
                     List.of(),
-                    List.of(),
+                    List.of(
+                            new ComiteRoleData("Soufiane BELHOUIDEG", List.of(
+                                    "Président du conseil du Laboratoire",
+                                    "Coordination scientifique et stratégique"
+                            )),
+                            new ComiteRoleData("Taj Eddine KHALILI", List.of(
+                                    "Responsable du matériel scientifique et informatique",
+                                    "Responsable des équipements du laboratoire"
+                            )),
+                            new ComiteRoleData("Aziz HIRRI", List.of(
+                                    "Responsable administratif",
+                                    "Rapports annuels",
+                                    "Rapporteur des réunions et PVs",
+                                    "Suivi des formations continues"
+                            )),
+                            new ComiteRoleData("Salwa TSOULI SARHIR", List.of(
+                                    "Responsable de la communication",
+                                    "Ouverture socio-économique",
+                                    "Organisation des événements scientifiques"
+                            ))
+                    ),
                     List.of(
                             new EquipeSeed(
                                     "Equipe de Recherche en Ingénierie des systèmes avancés et Energies (ASEE)",
@@ -159,9 +245,9 @@ public class LabData {
             new MemberData("Tannouch", "Adil", "MCH", "Systèmes Embarquées et Intelligence Artificielle Mécatronique", "EST BM", MemberRoleInLab.MEMBER, MemberAssociationType.ASSOCIATED, List.of(), "LaRESI"),
 
             // LRSTA
-            new MemberData("Soufiane", "Belhouideg", "OTHER", "Mécanique et Matériaux", "ENSA BM", MemberRoleInLab.DIRECTEUR, MemberAssociationType.PERMENANET,
+            new MemberData("Soufiane", "Belhouideg", "MCH", "Mécanique et Matériaux", "ENSA BM", MemberRoleInLab.DIRECTEUR, MemberAssociationType.PERMENANET,
                     List.of("MOQIN E Younes", "AIT OUADDI Abderrazzak", "OUZGUID Abdelhak"), "LRSTA"),
-            new MemberData("Aziz", "Hirri", "OTHER", "Chimie et Environnement", "ENSA BM", MemberRoleInLab.DIRECTEUR_ADJOINT, MemberAssociationType.PERMENANET, List.of(), "LRSTA"),
+            new MemberData("Aziz", "Hirri", "MCH", "Chimie et Environnement", "ENSA BM", MemberRoleInLab.DIRECTEUR_ADJOINT, MemberAssociationType.PERMENANET, List.of(), "LRSTA"),
             new MemberData("Taj Eddine", "Khalili", "MCH", "Génie électrique et énergies renouvelables", "ENSA BM", MemberRoleInLab.MEMBER, MemberAssociationType.PERMENANET, List.of(), "LRSTA"),
             new MemberData("Sabil", "Mohamed", "MCA", "Astrophysique", "ENSA BM", MemberRoleInLab.MEMBER, MemberAssociationType.PERMENANET, List.of(), "LRSTA"),
             new MemberData("Kaab", "Mohamed", "MCA", "Astrophysique", "ENSA BM", MemberRoleInLab.MEMBER, MemberAssociationType.PERMENANET, List.of(), "LRSTA"),

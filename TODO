@@ -1,2 +1,4 @@
-ask AI:
-which agent that can read backend and frontend (they are in different repos, backend is ready) and build fonrtend models and services, utils, login ...etc,
+in backend:
+add member id and image fields in Comité de gestion within lab object
+add  image in members within lab object
+in lab rename domaine de recherche -> thematiques de rechreche

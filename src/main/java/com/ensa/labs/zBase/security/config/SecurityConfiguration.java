@@ -54,13 +54,14 @@ public class SecurityConfiguration {
                     .csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(authorize ->
                             authorize
-                                    .requestMatchers("/api/equipes").permitAll()
-                                    .requestMatchers("/api/labs").permitAll()
-                                    .requestMatchers("/api/members").permitAll()
-                                    .requestMatchers("/api/productions").permitAll()
-                                    .requestMatchers("/api/publications").permitAll()
-                                    .requestMatchers("/api/auth/**").permitAll()
-                                    .requestMatchers("/api/files/get-image").permitAll()
+                                    .requestMatchers("/api/**").permitAll()
+//                                    .requestMatchers("/api/equipes").permitAll()
+//                                    .requestMatchers("/api/labs").permitAll()
+//                                    .requestMatchers("/api/members").permitAll()
+//                                    .requestMatchers("/api/productions").permitAll()
+//                                    .requestMatchers("/api/publications").permitAll()
+//                                    .requestMatchers("/api/auth/**").permitAll()
+//                                    .requestMatchers("/api/files/get-image").permitAll()
 
                                     .requestMatchers("/actuator/**").permitAll()
                                     .requestMatchers("/swagger-ui/**").permitAll()
