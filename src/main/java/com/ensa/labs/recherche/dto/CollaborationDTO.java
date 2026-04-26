@@ -8,6 +8,7 @@ public record CollaborationDTO(
         String establishment,
         String theme,
         String nature,
-        CollaborationScope scope
+        CollaborationScope scope,
+        String labAcronym
 ) {
 }
