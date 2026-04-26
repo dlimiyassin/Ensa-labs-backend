@@ -2,3 +2,120 @@ in backend:
 add member id and image fields in Comité de gestion within lab object
 add  image in members within lab object
 in lab rename domaine de recherche -> thematiques de rechreche
+
+
+
+
+
+=========================
+ROLE BASED ACCESS PROMPT:
+You are working on a Spring Boot backend that is already fully implemented (entities, services, controllers).
+Your task is NOT to modify controllers or business logic, but ONLY to update the security roles and seed data in a clean, minimal, and realistic way.
+
+## Context
+
+The system manages research labs with entities such as:
+
+* Lab, Member, Equipe, Production, Publication
+* A User entity for authentication with Roles
+* A Member entity linked to User and representing domain roles in labs
+
+## Important Constraints
+
+* DO NOT modify existing controllers or endpoints
+* DO NOT merge User.roles with Member.roleInLab
+* Use User.roles ONLY for authorization
+* Use Member.roleInLab ONLY for business meaning
+* Keep the solution simple and production-ready (no over-engineering)
+
+## Required Roles (only these 4)
+
+* ROLE_SUPER_ADMIN
+* ROLE_LAB_DIRECTOR
+* ROLE_TEAM_LEADER
+* ROLE_RESEARCHER
+
+## Permissions Matrix
+
+### ROLE_SUPER_ADMIN
+
+* Full access to all endpoints:
+
+  * Users: create, read, update, delete
+  * Labs: create, read, update, delete
+  * Equipes: create, read, update, delete
+  * Members: create, read, update, delete
+  * Productions: create, read, update, delete
+  * Publications: create, read, update, delete
+
+### ROLE_LAB_DIRECTOR
+
+* Scope: ONLY his Lab
+* Can:
+
+  * READ all data
+  * CREATE/UPDATE/DELETE:
+
+    * Equipes
+    * Members
+    * Productions
+    * Publications
+* Cannot:
+
+  * Manage users globally
+  * Modify other labs
+
+### ROLE_TEAM_LEADER
+
+* Scope: ONLY his Equipe
+* Can:
+
+  * READ all data
+  * CREATE/UPDATE:
+
+    * Publications
+    * Productions (if linked to team)
+* Cannot:
+
+  * Delete labs or equipes
+  * Manage members outside his team
+
+### ROLE_RESEARCHER
+
+* Scope: ONLY his Lab
+* Can:
+
+  * READ all data
+  * CREATE:
+
+    * Publications
+* Can:
+
+  * UPDATE only his own publications
+* Cannot:
+
+  * Delete data
+  * Manage structure (labs, equipes, members)
+
+## Data Seeding Requirements
+
+* Create default roles in database
+* Create at least:
+
+  * 1 SUPER_ADMIN user
+  * 1 LAB_DIRECTOR linked to a Member with roleInLab = DIRECTEUR
+  * 1 TEAM_LEADER linked to a Member responsible of an Equipe
+  * 1 RESEARCHER linked to a Member
+
+## Security Design Rules
+
+* Use role-based authorization (Spring Security)
+* Do NOT hardcode lab/team filtering in roles
+* Data ownership (lab/equipe) must be enforced at service level (not role explosion)
+
+## Expected Output
+
+* Clean role seeding logic
+* Clean user creation with assigned roles
+* No unnecessary complexity
+* Ready for JWT-based security
