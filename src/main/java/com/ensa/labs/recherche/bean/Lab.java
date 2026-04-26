@@ -81,6 +81,9 @@ public class Lab {
     @JoinTable(name = "lab_tags", joinColumns = @JoinColumn(name = "lab_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
 
+    @OneToMany(mappedBy = "lab")
+    private Set<Collaboration> collaborations = new HashSet<>();
+
     @Override
     public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; Lab lab = (Lab) o; return Objects.equals(id, lab.id);}    
     @Override

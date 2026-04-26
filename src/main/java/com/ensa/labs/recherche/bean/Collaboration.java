@@ -29,6 +29,10 @@ public class Collaboration {
     @Column(nullable = false)
     private CollaborationScope scope;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lab_id", nullable = false)
+    private Lab lab;
+
     @Override
     public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; Collaboration that = (Collaboration) o; return Objects.equals(id, that.id);}    
     @Override
