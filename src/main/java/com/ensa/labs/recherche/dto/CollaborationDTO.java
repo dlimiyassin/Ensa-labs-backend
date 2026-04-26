@@ -1,6 +1,7 @@
 package com.ensa.labs.recherche.dto;
 
 import com.ensa.labs.recherche.bean.enums.CollaborationScope;
+import com.ensa.labs.recherche.bean.enums.CollaborationType;
 
 public record CollaborationDTO(
         String id,
@@ -9,6 +10,7 @@ public record CollaborationDTO(
         String theme,
         String nature,
         CollaborationScope scope,
+        CollaborationType type,
         String labAcronym
 ) {
 }

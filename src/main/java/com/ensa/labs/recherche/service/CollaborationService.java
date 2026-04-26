@@ -2,6 +2,7 @@ package com.ensa.labs.recherche.service;
 
 import com.ensa.labs.exception.ResourceNotFoundException;
 import com.ensa.labs.recherche.bean.Collaboration;
+import com.ensa.labs.recherche.bean.enums.CollaborationType;
 import com.ensa.labs.recherche.dao.CollaborationRepository;
 import com.ensa.labs.recherche.dao.LabRepository;
 import com.ensa.labs.recherche.dto.CollaborationDTO;
@@ -26,6 +27,20 @@ public class CollaborationService {
         return collaborationRepository.findAll().stream().map(collaborationMapper::toDto).toList();
     }
 
+    public List<CollaborationDTO> findAllAcademic() {
+        return collaborationRepository.findAll().stream()
+                .filter(c -> c.getType() == CollaborationType.ACADEMIC)
+                .map(collaborationMapper::toDto)
+                .toList();
+    }
+
+    public List<CollaborationDTO> findAllIndustrial() {
+        return collaborationRepository.findAll().stream()
+                .filter(c -> c.getType() == CollaborationType.INDUSTRIAL)
+                .map(collaborationMapper::toDto)
+                .toList();
+    }
+
     public CollaborationDTO findById(String id) {
         return collaborationMapper.toDto(get(id));
     }
@@ -47,6 +62,7 @@ public class CollaborationService {
         collaboration.setTheme(dto.theme());
         collaboration.setNature(dto.nature());
         collaboration.setScope(dto.scope());
+        collaboration.setType(dto.type());
         applyRelations(collaboration, dto);
         return collaborationMapper.toDto(collaborationRepository.save(collaboration));
     }

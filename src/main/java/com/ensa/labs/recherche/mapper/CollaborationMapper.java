@@ -14,6 +14,7 @@ public class CollaborationMapper {
                 collaboration.getTheme(),
                 collaboration.getNature(),
                 collaboration.getScope(),
+                collaboration.getType(),
                 collaboration.getLab() != null ? collaboration.getLab().getAcronym() : null
         );
     }
@@ -26,6 +27,7 @@ public class CollaborationMapper {
         collaboration.setTheme(dto.theme());
         collaboration.setNature(dto.nature());
         collaboration.setScope(dto.scope());
+        collaboration.setType(dto.type());
         return collaboration;
     }
 }

@@ -35,6 +35,7 @@ public class CollaborationSeeder {
             c.setTheme(d.theme());
             c.setNature(d.nature());
             c.setScope(d.scope());
+            c.setType(d.type());
             c.setLab(lab);
             repo.save(c);
         }

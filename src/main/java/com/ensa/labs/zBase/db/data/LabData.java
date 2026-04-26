@@ -1,5 +1,6 @@
 package com.ensa.labs.zBase.db.data;
 
+import com.ensa.labs.recherche.bean.enums.CollaborationType;
 import com.ensa.labs.recherche.bean.enums.MemberAssociationType;
 import com.ensa.labs.recherche.bean.enums.CollaborationScope;
 import com.ensa.labs.recherche.bean.enums.MemberRoleInLab;
@@ -296,46 +297,46 @@ public class LabData {
     );
 
     public static final List<CollabData> COLLAB_LRSTA = List.of(
-            new CollabData("COSUMAR", "Oulad Ayyad - Beni Mellal", "Agro-alimentaire, Energie renouvelable, Mesures physiques", "Stages de recherche", CollaborationScope.REGIONAL),
-            new CollabData("OCP", "Khouribga", "Energie renouvelable, Informatique industrielle", "Stages de recherche", CollaborationScope.REGIONAL),
-            new CollabData("INRA", "Tadla", "Agriculture, IA", "Stages de recherche", CollaborationScope.REGIONAL),
-            new CollabData("FST Marrakech", null, "Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("Ecole Mohammadia d'Ingenieurs", "Mohammed V University in Rabat", "Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FS El Jadida", null, "Physique des matériaux", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("ENSA Kenitra", null, "Matériaux, Informatique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FSSM Marrakech", null, "Informatique, Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FS Agadir", null, "Physique des matériaux", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FS Rabat", null, "Informatique, Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FST Béni Mellal", null, "Agroalimentaire, Biotechnologie microbienne", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FSO Oujda", null, "Agroalimentaire, Biotechnologie microbienne", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FST Mohammadia", null, "Agroalimentaire, Biotechnologie microbienne", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("EST Fes", null, "Biotechnologie, agroalimentaire, santé", "Recherche scientifique – Encadrement commun", CollaborationScope.NATIONAL),
-            new CollabData("FMP Casablanca", null, "Chimie analytique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("Université Savoie Mont Blanc", "Polytech Annecy Chambéry", "Informatique, Matériaux, Mécatronique, Mécanique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.INTERNATIONAL),
-            new CollabData("King Fahd University of Petroleum and Minerals", "Saudi Arabia", "Matériaux, Mécanique", "Recherche scientifique", CollaborationScope.INTERNATIONAL),
-            new CollabData("Istanbul University Cerrahpasa", "Turkey", "Environnement, Physique, Matériaux", "Recherche scientifique", CollaborationScope.INTERNATIONAL),
-            new CollabData("École supérieure d’ingénieurs en agroalimentaire de Bretagne", "France", "Agroalimentaire, Biotechnologie microbienne", "Recherche scientifique – Encadrement", CollaborationScope.INTERNATIONAL),
-            new CollabData("Université du Littoral-Côte d'Opale", "France", "Agroalimentaire, Informatique, Mécatronique", "Recherche scientifique – Encadrement", CollaborationScope.INTERNATIONAL),
-            new CollabData("Université de Nantes", "France", "Informatique, Génie civil, Calcul de structure", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.INTERNATIONAL),
-            new CollabData("Université Inonu", "Malatya, Turquie", "Génie alimentaire", "Recherche scientifique", CollaborationScope.INTERNATIONAL)
+            new CollabData("COSUMAR", "Oulad Ayyad - Beni Mellal", "Agro-alimentaire, Energie renouvelable, Mesures physiques", "Stages de recherche", CollaborationScope.REGIONAL, CollaborationType.INDUSTRIAL),
+            new CollabData("OCP", "Khouribga", "Energie renouvelable, Informatique industrielle", "Stages de recherche", CollaborationScope.REGIONAL, CollaborationType.INDUSTRIAL),
+            new CollabData("INRA", "Tadla", "Agriculture, IA", "Stages de recherche", CollaborationScope.REGIONAL, CollaborationType.INDUSTRIAL),
+            new CollabData("FST Marrakech", null, "Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL, CollaborationType.ACADEMIC),
+            new CollabData("Ecole Mohammadia d'Ingenieurs", "Mohammed V University in Rabat", "Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FS El Jadida", null, "Physique des matériaux", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("ENSA Kenitra", null, "Matériaux, Informatique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FSSM Marrakech", null, "Informatique, Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FS Agadir", null, "Physique des matériaux", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FS Rabat", null, "Informatique, Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FST Béni Mellal", null, "Agroalimentaire, Biotechnologie microbienne", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FSO Oujda", null, "Agroalimentaire, Biotechnologie microbienne", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FST Mohammadia", null, "Agroalimentaire, Biotechnologie microbienne", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("EST Fes", null, "Biotechnologie, agroalimentaire, santé", "Recherche scientifique – Encadrement commun", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FMP Casablanca", null, "Chimie analytique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("Université Savoie Mont Blanc", "Polytech Annecy Chambéry", "Informatique, Matériaux, Mécatronique, Mécanique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("King Fahd University of Petroleum and Minerals", "Saudi Arabia", "Matériaux, Mécanique", "Recherche scientifique", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("Istanbul University Cerrahpasa", "Turkey", "Environnement, Physique, Matériaux", "Recherche scientifique", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("École supérieure d’ingénieurs en agroalimentaire de Bretagne", "France", "Agroalimentaire, Biotechnologie microbienne", "Recherche scientifique – Encadrement", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("Université du Littoral-Côte d'Opale", "France", "Agroalimentaire, Informatique, Mécatronique", "Recherche scientifique – Encadrement", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("Université de Nantes", "France", "Informatique, Génie civil, Calcul de structure", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("Université Inonu", "Malatya, Turquie", "Génie alimentaire", "Recherche scientifique", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC)
     );
 
     public static final List<CollabData> COLLAB_LARESI = List.of(
-            new CollabData("COSUMAR", "Oulad Ayyad - Beni Mellal", "Agro-alimentaire, Energie renouvelable, Mesures physiques", "Stages de recherche", CollaborationScope.REGIONAL),
-            new CollabData("OCP", "Khouribga", "Energie renouvelable, Informatique industrielle", "Stages de recherche", CollaborationScope.REGIONAL),
-            new CollabData("INRA", "Tadla", "Agriculture, IA", "Stages de recherche", CollaborationScope.REGIONAL),
-            new CollabData("FST Marrakech", null, "Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("Ecole Mohammadia d'Ingenieurs", "Mohammed V University in Rabat", "Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FS El Jadida", null, "Physique des matériaux", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("ENSA Kenitra", null, "Matériaux, Informatique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FSSM Marrakech", null, "Informatique, Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FS Agadir", null, "Physique des matériaux", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("FS Rabat", null, "Informatique, Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("ENSA Khouribga", null, "Informatique, Génie électrique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL),
-            new CollabData("Université Savoie Mont Blanc", "Polytech Annecy Chambéry", "Informatique, Matériaux, Mécatronique, Mécanique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.INTERNATIONAL),
-            new CollabData("King Fahd University of Petroleum and Minerals", "Saudi Arabia", "Matériaux, Mécanique", "Recherche scientifique", CollaborationScope.INTERNATIONAL),
-            new CollabData("Istanbul University Cerrahpasa", "Turkey", "Environnement, Physique, Matériaux", "Recherche scientifique", CollaborationScope.INTERNATIONAL),
-            new CollabData("Université de Nantes", "France", "Informatique, Génie civil, Calcul de structure", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.INTERNATIONAL)
+            new CollabData("COSUMAR", "Oulad Ayyad - Beni Mellal", "Agro-alimentaire, Energie renouvelable, Mesures physiques", "Stages de recherche", CollaborationScope.REGIONAL,CollaborationType.INDUSTRIAL),
+            new CollabData("OCP", "Khouribga", "Energie renouvelable, Informatique industrielle", "Stages de recherche", CollaborationScope.REGIONAL,CollaborationType.INDUSTRIAL),
+            new CollabData("INRA", "Tadla", "Agriculture, IA", "Stages de recherche", CollaborationScope.REGIONAL,CollaborationType.INDUSTRIAL),
+            new CollabData("FST Marrakech", null, "Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("Ecole Mohammadia d'Ingenieurs", "Mohammed V University in Rabat", "Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FS El Jadida", null, "Physique des matériaux", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("ENSA Kenitra", null, "Matériaux, Informatique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FSSM Marrakech", null, "Informatique, Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FS Agadir", null, "Physique des matériaux", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("FS Rabat", null, "Informatique, Mécanique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("ENSA Khouribga", null, "Informatique, Génie électrique, énergétique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.NATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("Université Savoie Mont Blanc", "Polytech Annecy Chambéry", "Informatique, Matériaux, Mécatronique, Mécanique", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("King Fahd University of Petroleum and Minerals", "Saudi Arabia", "Matériaux, Mécanique", "Recherche scientifique", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("Istanbul University Cerrahpasa", "Turkey", "Environnement, Physique, Matériaux", "Recherche scientifique", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC),
+            new CollabData("Université de Nantes", "France", "Informatique, Génie civil, Calcul de structure", "Recherche scientifique – Encadrement commun de thèses", CollaborationScope.INTERNATIONAL,CollaborationType.ACADEMIC)
     );
 
     public static final List<PublicationData> PUBLICATIONS = List.of(

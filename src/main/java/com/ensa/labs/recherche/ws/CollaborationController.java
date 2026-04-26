@@ -21,6 +21,16 @@ public class CollaborationController {
         return collaborationService.findAll();
     }
 
+    @GetMapping("/academic")
+    public List<CollaborationDTO> findAllAcademic() {
+        return collaborationService.findAllAcademic();
+    }
+
+    @GetMapping("/industrial")
+    public List<CollaborationDTO> findAllIndustrial() {
+        return collaborationService.findAllIndustrial();
+    }
+
     @GetMapping("/{id}")
     public CollaborationDTO findById(@PathVariable String id) {
         return collaborationService.findById(id);

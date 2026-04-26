@@ -1,6 +1,7 @@
 package com.ensa.labs.recherche.bean;
 
 import com.ensa.labs.recherche.bean.enums.CollaborationScope;
+import com.ensa.labs.recherche.bean.enums.CollaborationType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,10 @@ public class Collaboration {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CollaborationScope scope;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CollaborationType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lab_id", nullable = false)
