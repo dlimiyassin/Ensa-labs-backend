@@ -32,37 +32,57 @@ public class ProductionSeeder {
     }
 
     public void seed(Lab lab) {
-        if (prodRepo.count() > 0) {
-            return; // already seeded
-        }
+        if (prodRepo.findByLabAcronym(lab.getAcronym()).isPresent()) return;
 
         Production production = new Production();
         production.setLab(lab);
 
         Set<Publication> pubs = new HashSet<>();
         for (PublicationData d : LabData.PUBLICATIONS) {
+            if (!lab.getAcronym().equalsIgnoreCase(d.labAcronym())) continue;
             Publication p = new Publication();
             p.setLab(lab);
-            p.setType(PublicationType.JOURNAL);
+            p.setType(d.type() == null ? PublicationType.JOURNAL : d.type());
             p.setTitle(d.title());
             p.setPublicationYear(d.year());
             p.setAuthors(d.authors());
             p.setJournal(d.journal());
+            p.setConference(d.conference());
             p.setDoi(d.doi());
+            p.setPages(d.pages());
             pubs.add(pubRepo.save(p));
+        }
+
+        Set<Publication> communications = new HashSet<>();
+        for (PublicationData d : LabData.COMMUNICATIONS) {
+            if (!lab.getAcronym().equalsIgnoreCase(d.labAcronym())) continue;
+            Publication p = new Publication();
+            p.setLab(lab);
+            p.setType(PublicationType.COMMUNICATION);
+            p.setTitle(d.title());
+            p.setPublicationYear(d.year());
+            p.setAuthors(d.authors());
+            p.setConference(d.conference());
+            p.setJournal(d.journal());
+            p.setDoi(d.doi());
+            p.setPages(d.pages());
+            communications.add(pubRepo.save(p));
         }
 
         Set<Thesis> theses = new HashSet<>();
         for (ThesisData d : LabData.THESES) {
+            if (!lab.getAcronym().equalsIgnoreCase(d.labAcronym())) continue;
             Thesis t = new Thesis();
             t.setLab(lab);
             t.setAuthor(d.author());
             t.setTitle(d.title());
+            t.setDefenseDate(d.defenseDate());
             t.setSupervisor(d.supervisor());
             theses.add(thesisRepo.save(t));
         }
 
         production.setPublications(pubs);
+        production.setCommunications(communications);
         production.setTheses(theses);
 
         prodRepo.save(production);
