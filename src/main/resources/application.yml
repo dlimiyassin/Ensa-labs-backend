@@ -3,9 +3,9 @@ spring:
     name: ensa-labs
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/ensa_labs
-    username: postgres
-    password: 1234
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/ensa_labs}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:1234}
     driver-class-name: org.postgresql.Driver
 
   jackson:
@@ -16,12 +16,32 @@ spring:
     hibernate:
       ddl-auto: update
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 security:
-  enabled: true
+  enabled: ${SECURITY_ENABLED:true}
+
+app:
+  security:
+    jwt:
+      # Override JWT_SECRET in every non-local environment (at least 32 characters).
+      secret: ${JWT_SECRET:change-me-ensa-labs-local-development-secret-key}
+      issuer: ensa-labs
+      # 30 minutes
+      access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:1800000}
+      # 7 days
+      refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  files:
+    upload-dir: ${UPLOAD_DIR:uploads}
 
 export:
   anonymization:
-    salt: ensa-labs-secret-2025
+    salt: ${EXPORT_SALT:ensa-labs-secret-2025}

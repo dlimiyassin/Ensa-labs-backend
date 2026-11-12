@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface EquipeRepository extends JpaRepository<Equipe, String> {
     Optional<Equipe> findByName(String name);
     List<Equipe> findByLabAcronym(String acronym);
+    List<Equipe> findByResponsableId(String memberId);
+    List<Equipe> findByMembersId(String memberId);
 }

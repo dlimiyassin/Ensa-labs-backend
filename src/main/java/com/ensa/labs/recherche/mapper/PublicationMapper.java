@@ -20,7 +20,8 @@ public class PublicationMapper {
                 publication.getDoi(),
                 publication.getPages(),
                 publication.getLab() != null ? publication.getLab().getAcronym() : null,
-                publication.getEquipe() != null ? publication.getEquipe().getId() : null
+                publication.getEquipe() != null ? publication.getEquipe().getId() : null,
+                publication.getCreatedBy() != null ? publication.getCreatedBy().getUsername() : null
         );
     }
 

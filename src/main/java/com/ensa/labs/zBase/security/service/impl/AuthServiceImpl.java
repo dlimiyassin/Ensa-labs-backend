@@ -1,8 +1,10 @@
 package com.ensa.labs.zBase.security.service.impl;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.ensa.labs.zBase.security.bean.Role;
 import com.ensa.labs.zBase.security.bean.User;
 import com.ensa.labs.zBase.security.bean.enums.UserStatus;
+import com.ensa.labs.zBase.security.constant.Roles;
 import com.ensa.labs.zBase.security.dao.facade.RoleDao;
 import com.ensa.labs.zBase.security.dao.facade.UserDao;
 import com.ensa.labs.zBase.security.service.facade.AuthService;
@@ -18,19 +20,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static com.ensa.labs.zBase.security.constant.JWTUtil.REFRESH_TOKEN_TYPE;
 
 @Service
 public class AuthServiceImpl implements AuthService {
-
     private final UserDao userDao;
     private final RoleDao roleDao;
     private final PasswordEncoder passwordEncoder;
@@ -49,20 +51,33 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JWTAuthResponse login(LoginDto loginDto) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
         Authentication authenticate;
         try {
-            authenticate = authenticationManager.authenticate(authenticationToken);
+            authenticate = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Username or Password incorrect");
         }
-        SecurityContextHolder.getContext().setAuthentication(authenticate);
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authenticate.getPrincipal();
         userService.updateLastLogin(user.getUsername());
+        return issueTokens(user.getUsername(), user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
+    }
 
-        String jwtAccessToken = jwtHelper.generateAccessToken(user.getUsername(), user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
-        String jwtRefreshToken = jwtHelper.generateRefreshToken(user.getUsername());
-        return new JWTAuthResponse(jwtAccessToken, jwtRefreshToken);
+    @Override
+    @Transactional(readOnly = true)
+    public JWTAuthResponse refresh(String refreshToken) {
+        String username;
+        try {
+            username = jwtHelper.verify(refreshToken, REFRESH_TOKEN_TYPE).getSubject();
+        } catch (JWTVerificationException e) {
+            throw new BadCredentialsException("Invalid or expired refresh token");
+        }
+        User user = userDao.findByUsername(username)
+                .orElseThrow(() -> new BadCredentialsException("Invalid or expired refresh token"));
+        if (!user.isEnabled() || user.getStatus() == UserStatus.BLOQUE) {
+            throw new BadCredentialsException("Account disabled");
+        }
+        return issueTokens(user.getUsername(), user.getRoles().stream().map(Role::getName).toList());
     }
 
     @Override
@@ -71,10 +86,8 @@ public class AuthServiceImpl implements AuthService {
         if (userDao.findByUsername(registerDto.getUsername()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
-
         Set<Role> roles = new HashSet<>();
-        roles.add(roleDao.findByName("RESEARCHER").orElseThrow(() -> new IllegalStateException("RESEARCHER role not found")));
-
+        roles.add(roleDao.findByName(Roles.RESEARCHER).orElseThrow(() -> new IllegalStateException(Roles.RESEARCHER + " role not found")));
         User user = new User();
         user.setFirstName(registerDto.getFirstName());
         user.setLastName(registerDto.getLastName());
@@ -86,8 +99,13 @@ public class AuthServiceImpl implements AuthService {
         user.setStatus(UserStatus.ACTIF);
         user.setPassword(passwordEncoder.encode(registerDto.getCin()));
         user.setRoles(roles);
+        return userDao.save(user).getId();
+    }
 
-        userDao.save(user);
-        return "User registered successfully";
+    private JWTAuthResponse issueTokens(String username, List<String> roles) {
+        return new JWTAuthResponse(
+                jwtHelper.generateAccessToken(username, roles),
+                jwtHelper.generateRefreshToken(username),
+                jwtHelper.getAccessTokenExpirationMs() / 1000);
     }
 }

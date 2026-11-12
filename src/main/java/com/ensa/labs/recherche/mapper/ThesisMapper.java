@@ -10,4 +10,11 @@ public class ThesisMapper {
         return new ThesisDTO(thesis.getId(), thesis.getAuthor(), thesis.getTitle(), thesis.getDefenseDate(), thesis.getSupervisor(),
                 thesis.getLab() != null ? thesis.getLab().getAcronym() : null);
     }
+
+    public void copyToEntity(ThesisDTO dto, Thesis thesis) {
+        thesis.setAuthor(dto.author());
+        thesis.setTitle(dto.title());
+        thesis.setDefenseDate(dto.defenseDate());
+        thesis.setSupervisor(dto.supervisor());
+    }
 }

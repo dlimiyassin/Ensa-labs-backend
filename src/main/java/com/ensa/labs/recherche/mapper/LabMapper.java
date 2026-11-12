@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class LabMapper {
     private final MemberMapper memberMapper;
     private final ComiteGestionMapper comiteGestionMapper;
-    private final DomaineRechercheMapper domaineRechercheMapper;
+    private final ThematiqueRechercheMapper thematiqueRechercheMapper;
     private final AxeRechercheMapper axeRechercheMapper;
     private final EquipmentMapper equipmentMapper;
     private final CompetenceMapper competenceMapper;
@@ -21,7 +21,7 @@ public class LabMapper {
 
     public LabMapper(MemberMapper memberMapper,
                      ComiteGestionMapper comiteGestionMapper,
-                     DomaineRechercheMapper domaineRechercheMapper,
+                     ThematiqueRechercheMapper thematiqueRechercheMapper,
                      AxeRechercheMapper axeRechercheMapper,
                      EquipmentMapper equipmentMapper,
                      CompetenceMapper competenceMapper,
@@ -31,7 +31,7 @@ public class LabMapper {
                      TagMapper tagMapper) {
         this.memberMapper = memberMapper;
         this.comiteGestionMapper = comiteGestionMapper;
-        this.domaineRechercheMapper = domaineRechercheMapper;
+        this.thematiqueRechercheMapper = thematiqueRechercheMapper;
         this.axeRechercheMapper = axeRechercheMapper;
         this.equipmentMapper = equipmentMapper;
         this.competenceMapper = competenceMapper;
@@ -58,7 +58,7 @@ public class LabMapper {
                 lab.getDirecteurAdjoint() != null ? memberMapper.toDto(lab.getDirecteurAdjoint()) : null,
                 lab.getMembers().stream().map(memberMapper::toDto).toList(),
                 lab.getComiteGestion().stream().map(comiteGestionMapper::toDto).toList(),
-                lab.getDomainesRecherche().stream().map(domaineRechercheMapper::toDto).toList(),
+                lab.getDomainesRecherche().stream().map(thematiqueRechercheMapper::toDto).toList(),
                 lab.getAxesRecherche().stream().map(axeRechercheMapper::toDto).toList(),
                 lab.getEquipments().stream().map(equipmentMapper::toDto).toList(),
                 lab.getCompetences().stream().map(competenceMapper::toDto).toList(),

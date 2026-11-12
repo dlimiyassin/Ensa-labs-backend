@@ -1,6 +1,7 @@
 package com.ensa.labs.recherche.bean;
 
 import com.ensa.labs.recherche.bean.enums.PublicationType;
+import com.ensa.labs.zBase.security.bean.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,6 +48,11 @@ public class Publication {
     @ManyToOne
     @JoinColumn(name = "equipe_id")
     private Equipe equipe;
+
+    /** Author account of the record; researchers may only update their own publications. */
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
 
     @Override
     public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; Publication that = (Publication) o; return Objects.equals(id, that.id);}    

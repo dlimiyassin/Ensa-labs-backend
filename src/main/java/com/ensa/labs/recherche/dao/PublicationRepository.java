@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface PublicationRepository extends JpaRepository<Publication, String> {
     List<Publication> findByLabAcronym(String acronym);
+    List<Publication> findByEquipeId(String equipeId);
 }

@@ -10,4 +10,9 @@ public class EquipmentMapper {
         return new EquipmentDTO(equipment.getId(), equipment.getName(), equipment.getCategory(),
                 equipment.getLab() != null ? equipment.getLab().getAcronym() : null);
     }
+
+    public void copyToEntity(EquipmentDTO dto, Equipment equipment) {
+        equipment.setName(dto.name());
+        equipment.setCategory(dto.category());
+    }
 }

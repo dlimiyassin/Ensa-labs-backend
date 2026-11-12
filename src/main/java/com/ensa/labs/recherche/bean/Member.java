@@ -34,6 +34,9 @@ public class Member {
 
     private String establishment;
 
+    /** Profile picture path, relative to the upload directory (served by /api/files/get-image). */
+    private String image;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberAssociationType associationType = MemberAssociationType.PERMENANET;

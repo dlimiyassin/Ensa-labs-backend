@@ -8,6 +8,9 @@ import com.ensa.labs.zBase.security.dao.facade.UserDao;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.ensa.labs.zBase.security.constant.Roles;
+
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,7 +35,7 @@ public class UserSeeder {
             user.setLastName("Admin");
             user.setEnabled(true);
             user.setStatus(UserStatus.ACTIF);
-            user.setRoles(Set.of(roles.get("ADMIN")));
+            user.setRoles(new HashSet<>(Set.of(roles.get(Roles.SUPER_ADMIN))));
             user.setPassword(passwordEncoder.encode("AA111"));
             return userDao.save(user);
         });
@@ -49,7 +52,7 @@ public class UserSeeder {
             user.setLastName(data.lastName());
             user.setEnabled(true);
             user.setStatus(UserStatus.ACTIF);
-            user.setRoles(Set.of(roles.get("RESEARCHER")));
+            user.setRoles(new HashSet<>(Set.of(roles.get(Roles.RESEARCHER))));
             user.setPassword(passwordEncoder.encode(user.getCin()));
             return userDao.save(user);
         });

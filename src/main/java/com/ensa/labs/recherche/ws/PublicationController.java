@@ -2,7 +2,9 @@ package com.ensa.labs.recherche.ws;
 
 import com.ensa.labs.recherche.dto.PublicationDTO;
 import com.ensa.labs.recherche.service.PublicationService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,12 +27,15 @@ public class PublicationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PublicationDTO create(@RequestBody PublicationDTO dto) { return publicationService.create(dto); }
+    @PreAuthorize(Authorities.PUBLICATION_AUTHORS)
+    public PublicationDTO create(@Valid @RequestBody PublicationDTO dto) { return publicationService.create(dto); }
 
     @PutMapping("/{id}")
-    public PublicationDTO update(@PathVariable String id, @RequestBody PublicationDTO dto) { return publicationService.update(id, dto); }
+    @PreAuthorize(Authorities.PUBLICATION_AUTHORS)
+    public PublicationDTO update(@PathVariable String id, @Valid @RequestBody PublicationDTO dto) { return publicationService.update(id, dto); }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize(Authorities.LAB_MANAGERS)
     public void delete(@PathVariable String id) { publicationService.delete(id); }
 }

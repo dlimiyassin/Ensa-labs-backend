@@ -2,7 +2,9 @@ package com.ensa.labs.recherche.ws;
 
 import com.ensa.labs.recherche.dto.ProductionDTO;
 import com.ensa.labs.recherche.service.ProductionService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,12 +29,15 @@ public class ProductionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductionDTO create(@RequestBody ProductionDTO dto) { return productionService.create(dto); }
+    @PreAuthorize(Authorities.PRODUCTION_EDITORS)
+    public ProductionDTO create(@Valid @RequestBody ProductionDTO dto) { return productionService.create(dto); }
 
     @PutMapping("/{id}")
-    public ProductionDTO update(@PathVariable String id, @RequestBody ProductionDTO dto) { return productionService.update(id, dto); }
+    @PreAuthorize(Authorities.PRODUCTION_EDITORS)
+    public ProductionDTO update(@PathVariable String id, @Valid @RequestBody ProductionDTO dto) { return productionService.update(id, dto); }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize(Authorities.LAB_MANAGERS)
     public void delete(@PathVariable String id) { productionService.delete(id); }
 }

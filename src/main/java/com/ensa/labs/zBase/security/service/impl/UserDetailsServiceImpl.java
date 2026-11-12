@@ -1,6 +1,7 @@
 package com.ensa.labs.zBase.security.service.impl;
 
 import com.ensa.labs.zBase.security.bean.User;
+import com.ensa.labs.zBase.security.bean.enums.UserStatus;
 import com.ensa.labs.zBase.security.service.facade.UserService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,7 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.isEnabled(),
                 true,
                 true,
-                true,
+                user.getStatus() != UserStatus.BLOQUE,
                 authorities);
     }
 }

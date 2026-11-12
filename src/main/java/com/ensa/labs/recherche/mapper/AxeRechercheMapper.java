@@ -14,4 +14,8 @@ public class AxeRechercheMapper {
                 axeRecherche.getEquipe() != null ? axeRecherche.getEquipe().getId() : null
         );
     }
+
+    public void copyToEntity(AxeRechercheDTO dto, AxeRecherche axeRecherche) {
+        axeRecherche.setTitle(dto.title());
+    }
 }

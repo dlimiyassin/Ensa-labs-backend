@@ -2,15 +2,18 @@ package com.ensa.labs.recherche.dto;
 
 import com.ensa.labs.recherche.bean.enums.CollaborationScope;
 import com.ensa.labs.recherche.bean.enums.CollaborationType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CollaborationDTO(
         String id,
-        String organization,
+        @NotBlank String organization,
         String establishment,
         String theme,
         String nature,
-        CollaborationScope scope,
-        CollaborationType type,
-        String labAcronym
+        @NotNull CollaborationScope scope,
+        @NotNull CollaborationType type,
+        @NotBlank String labAcronym,
+        String logo
 ) {
 }

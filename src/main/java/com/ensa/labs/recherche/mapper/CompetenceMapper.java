@@ -10,4 +10,9 @@ public class CompetenceMapper {
         return new CompetenceDTO(competence.getId(), competence.getDescription(), competence.getType(),
                 competence.getLab() != null ? competence.getLab().getAcronym() : null);
     }
+
+    public void copyToEntity(CompetenceDTO dto, Competence competence) {
+        competence.setDescription(dto.description());
+        competence.setType(dto.type());
+    }
 }

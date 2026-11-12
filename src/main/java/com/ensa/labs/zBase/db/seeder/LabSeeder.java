@@ -76,6 +76,7 @@ public class LabSeeder {
                     ComiteGestionMembre m = new ComiteGestionMembre();
                     m.setNomEnseignant(c.nomEnseignant());
                     m.setRoleComite(role);
+                    m.setMember(findCommitteeMember(allMembers, c.nomEnseignant()));
                     return m;
                 }))
                 .collect(Collectors.toList());
@@ -95,6 +96,16 @@ public class LabSeeder {
                 .map(MemberData::labAcronym)
                 .findFirst()
                 .orElse("");
+    }
+
+    /** Committee names are written "Last First" or "First Last" depending on the source. */
+    private Member findCommitteeMember(List<Member> members, String fullName) {
+        Member member = findByFullName(members, fullName);
+        if (member != null || fullName == null) {
+            return member;
+        }
+        String[] parts = fullName.trim().split("\\s+", 2);
+        return parts.length == 2 ? findByFullName(members, parts[1] + " " + parts[0]) : null;
     }
 
     private Member findByFullName(List<Member> members, String fullName) {

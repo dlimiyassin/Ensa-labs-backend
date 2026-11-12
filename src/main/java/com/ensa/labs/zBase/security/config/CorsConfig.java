@@ -3,24 +3,15 @@ package com.ensa.labs.zBase.security.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * MVC content negotiation. CORS itself is configured once, in {@link SecurityConfiguration}.
+ */
 @Configuration
 @EnableWebMvc
 public class CorsConfig implements WebMvcConfigurer {
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:4200")
-                .allowedMethods("DELETE", "GET", "POST", "PATCH", "PUT")
-                .allowedHeaders("Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Origin", "Cache-Control", "Content-Type", "Authorization", "Content-Disposition", "enctype")
-                .exposedHeaders("Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Origin", "Cache-Control", "Content-Type", "Authorization", "Content-Disposition", "enctype")
-                .allowCredentials(true).maxAge(3600);
-
-    }
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {

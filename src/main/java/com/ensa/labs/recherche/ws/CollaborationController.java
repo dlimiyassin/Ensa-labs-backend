@@ -2,7 +2,9 @@ package com.ensa.labs.recherche.ws;
 
 import com.ensa.labs.recherche.dto.CollaborationDTO;
 import com.ensa.labs.recherche.service.CollaborationService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/collaborations")
 public class CollaborationController {
+
     private final CollaborationService collaborationService;
 
     public CollaborationController(CollaborationService collaborationService) {
@@ -43,17 +46,20 @@ public class CollaborationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CollaborationDTO create(@RequestBody CollaborationDTO dto) {
+    @PreAuthorize(Authorities.LAB_MANAGERS)
+    public CollaborationDTO create(@Valid @RequestBody CollaborationDTO dto) {
         return collaborationService.create(dto);
     }
 
     @PutMapping("/{id}")
-    public CollaborationDTO update(@PathVariable String id, @RequestBody CollaborationDTO dto) {
+    @PreAuthorize(Authorities.LAB_MANAGERS)
+    public CollaborationDTO update(@PathVariable String id, @Valid @RequestBody CollaborationDTO dto) {
         return collaborationService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize(Authorities.LAB_MANAGERS)
     public void delete(@PathVariable String id) {
         collaborationService.delete(id);
     }

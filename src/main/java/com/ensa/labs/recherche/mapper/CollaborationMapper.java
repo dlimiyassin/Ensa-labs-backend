@@ -15,7 +15,8 @@ public class CollaborationMapper {
                 collaboration.getNature(),
                 collaboration.getScope(),
                 collaboration.getType(),
-                collaboration.getLab() != null ? collaboration.getLab().getAcronym() : null
+                collaboration.getLab() != null ? collaboration.getLab().getAcronym() : null,
+                collaboration.getLogo()
         );
     }
 
@@ -28,6 +29,7 @@ public class CollaborationMapper {
         collaboration.setNature(dto.nature());
         collaboration.setScope(dto.scope());
         collaboration.setType(dto.type());
+        collaboration.setLogo(dto.logo());
         return collaboration;
     }
 }

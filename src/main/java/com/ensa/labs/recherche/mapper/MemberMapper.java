@@ -11,7 +11,8 @@ public class MemberMapper {
     public MemberDTO toDto(Member member) {
         return new MemberDTO(member.getId(), member.getFirstName(), member.getLastName(), member.getGrade(), member.getSpeciality(), member.getEstablishment(),
                 member.getAssociationType(), member.getRoleInLab(), member.getPhdStudents(), member.getLab() != null ? member.getLab().getAcronym() : null,
-                member.getUser() != null ? member.getUser().getId() : null);
+                member.getUser() != null ? member.getUser().getId() : null,
+                member.getImage());
     }
 
     public Member toEntity(MemberDTO dto) {
@@ -22,8 +23,13 @@ public class MemberMapper {
         member.setGrade(dto.grade());
         member.setSpeciality(dto.speciality());
         member.setEstablishment(dto.establishment());
-        member.setAssociationType(dto.associationType());
-        member.setRoleInLab(dto.roleInLab());
+        if (dto.associationType() != null) {
+            member.setAssociationType(dto.associationType());
+        }
+        if (dto.roleInLab() != null) {
+            member.setRoleInLab(dto.roleInLab());
+        }
+        member.setImage(dto.image());
         member.setPhdStudents(dto.phdStudents() == null ? new ArrayList<>() : new ArrayList<>(dto.phdStudents()));
         return member;
     }

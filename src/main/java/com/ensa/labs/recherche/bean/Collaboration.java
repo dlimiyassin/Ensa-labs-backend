@@ -26,6 +26,9 @@ public class Collaboration {
 
     private String nature;
 
+    /** Partner logo path relative to the upload directory (optional). */
+    private String logo;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CollaborationScope scope;

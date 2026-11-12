@@ -2,6 +2,7 @@ package com.ensa.labs.zBase.security.ws.facade;
 
 
 import com.ensa.labs.zBase.security.bean.Role;
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.ensa.labs.zBase.security.dao.criteria.RoleCriteria;
 import com.ensa.labs.zBase.security.service.facade.RoleService;
 import com.ensa.labs.zBase.security.ws.dto.RoleDto;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/roles")
+@PreAuthorize("hasRole('SUPER_ADMIN')")
 public class RoleController {
 
 
@@ -23,7 +25,7 @@ public class RoleController {
     @Autowired
     private RoleTransformer roleTransformer;
 
-    @GetMapping("/")
+    @GetMapping({"", "/"})
     public ResponseEntity<List<RoleDto>> findAll() {
         return ResponseEntity.ok(roleTransformer.toDto(roleService.findAll()));
     }

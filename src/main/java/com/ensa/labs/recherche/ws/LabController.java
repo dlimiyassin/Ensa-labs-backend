@@ -2,7 +2,9 @@ package com.ensa.labs.recherche.ws;
 
 import com.ensa.labs.recherche.dto.LabDTO;
 import com.ensa.labs.recherche.service.LabService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,12 +33,16 @@ public class LabController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public LabDTO create(@RequestBody LabDTO dto) { return labService.create(dto); }
+    @PreAuthorize(Authorities.SUPER_ADMIN)
+    public LabDTO create(@Valid @RequestBody LabDTO dto) { return labService.create(dto); }
 
+    /** A lab director may update his own lab (checked in the service). */
     @PutMapping("/{id}")
-    public LabDTO update(@PathVariable String id, @RequestBody LabDTO dto) { return labService.update(id, dto); }
+    @PreAuthorize(Authorities.LAB_MANAGERS)
+    public LabDTO update(@PathVariable String id, @Valid @RequestBody LabDTO dto) { return labService.update(id, dto); }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize(Authorities.SUPER_ADMIN)
     public void delete(@PathVariable String id) { labService.delete(id); }
 }

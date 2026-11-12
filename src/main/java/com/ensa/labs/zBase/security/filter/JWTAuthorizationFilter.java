@@ -1,8 +1,5 @@
 package com.ensa.labs.zBase.security.filter;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ensa.labs.zBase.security.utils.JWTHelper;
@@ -11,18 +8,21 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
-import static com.ensa.labs.zBase.security.constant.JWTUtil.AUTH_HEADER;
-import static com.ensa.labs.zBase.security.constant.JWTUtil.SECRET;
+import static com.ensa.labs.zBase.security.constant.JWTUtil.*;
 
+/**
+ * Reads the Bearer access token (if any) and populates the security context.
+ * An invalid or expired token never blocks the request by itself: the request simply
+ * continues anonymously, so public endpoints keep working and protected endpoints
+ * answer 401 through the configured authentication entry point.
+ */
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
 
     private final JWTHelper jwtHelper;
@@ -34,39 +34,20 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().equals("/refresh-token")) {
-            filterChain.doFilter(request, response);
-        } else {
-            String accessToken = jwtHelper.extractTokenFromHeaderIfExists(request.getHeader(AUTH_HEADER));
-            if (accessToken != null) {
-                try {
-                    Algorithm algorithm = Algorithm.HMAC256(SECRET);
-                    JWTVerifier jwtVerifier = JWT.require(algorithm).build();
-                    DecodedJWT decodedJWT = jwtVerifier.verify(accessToken);
-                    String username = decodedJWT.getSubject();
-                    String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
-                    Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-                    for (String role : roles) {
-                        authorities.add(new SimpleGrantedAuthority(role));
-                    }
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            authorities
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                } catch (JWTVerificationException e) {
-                    // Token verification failed
-                    logger.error("JWT Verification failed: {}", e.getCause());
-                    SecurityContextHolder.clearContext();
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    return;
-                }
+        String accessToken = jwtHelper.extractTokenFromHeaderIfExists(request.getHeader(AUTH_HEADER));
+        if (accessToken != null) {
+            try {
+                DecodedJWT decodedJWT = jwtHelper.verify(accessToken, ACCESS_TOKEN_TYPE);
+                List<String> roles = decodedJWT.getClaim(ROLES_CLAIM).asList(String.class);
+                List<SimpleGrantedAuthority> authorities = roles == null ? List.of()
+                        : roles.stream().map(SimpleGrantedAuthority::new).toList();
+                SecurityContextHolder.getContext().setAuthentication(
+                        new UsernamePasswordAuthenticationToken(decodedJWT.getSubject(), null, authorities));
+            } catch (JWTVerificationException e) {
+                logger.debug("JWT verification failed: " + e.getMessage());
+                SecurityContextHolder.clearContext();
             }
-
-            filterChain.doFilter(request, response);
         }
+        filterChain.doFilter(request, response);
     }
-
-
 }

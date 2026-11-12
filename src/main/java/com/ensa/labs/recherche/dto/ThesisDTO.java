@@ -1,13 +1,16 @@
 package com.ensa.labs.recherche.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 
 public record ThesisDTO(
         String id,
-        String author,
-        String title,
+        @NotBlank String author,
+        @NotBlank @Size(max = 2000) String title,
         LocalDate defenseDate,
         String supervisor,
-        String labAcronym
+        @NotBlank String labAcronym
 ) {
 }

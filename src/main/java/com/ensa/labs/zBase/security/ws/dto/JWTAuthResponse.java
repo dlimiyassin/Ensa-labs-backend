@@ -7,9 +7,12 @@ public class JWTAuthResponse {
     private String accessToken;
     private String refreshToken;
     private String tokenType = "Bearer";
+    /** Access token lifetime in seconds. */
+    private long expiresIn;
 
-    public JWTAuthResponse(String accessToken, String refreshToken) {
+    public JWTAuthResponse(String accessToken, String refreshToken, long expiresIn) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+        this.expiresIn = expiresIn;
     }
 }

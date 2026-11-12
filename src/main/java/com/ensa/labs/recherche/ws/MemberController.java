@@ -2,7 +2,9 @@ package com.ensa.labs.recherche.ws;
 
 import com.ensa.labs.recherche.dto.MemberDTO;
 import com.ensa.labs.recherche.service.MemberService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,12 +29,15 @@ public class MemberController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MemberDTO create(@RequestBody MemberDTO dto) { return memberService.create(dto); }
+    @PreAuthorize(Authorities.LAB_MANAGERS)
+    public MemberDTO create(@Valid @RequestBody MemberDTO dto) { return memberService.create(dto); }
 
     @PutMapping("/{id}")
-    public MemberDTO update(@PathVariable String id, @RequestBody MemberDTO dto) { return memberService.update(id, dto); }
+    @PreAuthorize(Authorities.LAB_MANAGERS)
+    public MemberDTO update(@PathVariable String id, @Valid @RequestBody MemberDTO dto) { return memberService.update(id, dto); }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize(Authorities.LAB_MANAGERS)
     public void delete(@PathVariable String id) { memberService.delete(id); }
 }

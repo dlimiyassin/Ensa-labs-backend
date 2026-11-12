@@ -1,5 +1,7 @@
 package com.ensa.labs.recherche.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.List;
 
 public record ProductionDTO(
@@ -7,6 +9,6 @@ public record ProductionDTO(
         List<PublicationDTO> publications,
         List<PublicationDTO> communications,
         List<ThesisDTO> theses,
-        String labAcronym
+        @NotBlank String labAcronym
 ) {
 }

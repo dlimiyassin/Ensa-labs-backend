@@ -2,7 +2,9 @@ package com.ensa.labs.recherche.ws;
 
 import com.ensa.labs.recherche.dto.EquipeDTO;
 import com.ensa.labs.recherche.service.EquipeService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,12 +27,15 @@ public class EquipeController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EquipeDTO create(@RequestBody EquipeDTO dto) { return equipeService.create(dto); }
+    @PreAuthorize(Authorities.LAB_MANAGERS)
+    public EquipeDTO create(@Valid @RequestBody EquipeDTO dto) { return equipeService.create(dto); }
 
     @PutMapping("/{id}")
-    public EquipeDTO update(@PathVariable String id, @RequestBody EquipeDTO dto) { return equipeService.update(id, dto); }
+    @PreAuthorize(Authorities.LAB_MANAGERS)
+    public EquipeDTO update(@PathVariable String id, @Valid @RequestBody EquipeDTO dto) { return equipeService.update(id, dto); }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize(Authorities.LAB_MANAGERS)
     public void delete(@PathVariable String id) { equipeService.delete(id); }
 }
