@@ -1,6 +1,7 @@
 package com.ensa.labs.recherche.ws;
 
 import com.ensa.labs.recherche.dto.LabDTO;
+import com.ensa.labs.recherche.dto.LabSummaryDTO;
 import com.ensa.labs.recherche.service.LabService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,10 @@ public class LabController {
 
     @GetMapping
     public List<LabDTO> findAll() { return labService.findAll(); }
+
+    /** Lightweight list for menus and the home page. */
+    @GetMapping("/summary")
+    public List<LabSummaryDTO> findSummaries() { return labService.findSummaries(); }
 
     @GetMapping("/{id}")
     public LabDTO findById(@PathVariable String id) { return labService.findById(id); }

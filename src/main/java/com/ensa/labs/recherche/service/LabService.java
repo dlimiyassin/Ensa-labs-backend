@@ -13,6 +13,7 @@ import com.ensa.labs.recherche.dao.PublicationRepository;
 import com.ensa.labs.recherche.dao.TagRepository;
 import com.ensa.labs.recherche.dao.ThesisRepository;
 import com.ensa.labs.recherche.dto.LabDTO;
+import com.ensa.labs.recherche.dto.LabSummaryDTO;
 import com.ensa.labs.recherche.mapper.LabMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,30 @@ public class LabService {
     }
 
     public List<LabDTO> findAll() { return labRepository.findAll().stream().map(labMapper::toDto).toList(); }
+
+    /** Menus and home page: acronym, names and counts only, sorted by acronym. */
+    @Transactional(readOnly = true)
+    public List<LabSummaryDTO> findSummaries() {
+        return labRepository.findAll().stream()
+                .sorted(java.util.Comparator.comparing(Lab::getAcronym, String.CASE_INSENSITIVE_ORDER))
+                .map(lab -> new LabSummaryDTO(
+                        lab.getId(),
+                        lab.getAcronym(),
+                        lab.getTitleFr(),
+                        lab.getTitleEn(),
+                        lab.getShortTitle(),
+                        lab.getUniversity(),
+                        lab.getProgram(),
+                        lab.getMembers().size(),
+                        lab.getAxesRecherche().stream()
+                                .map(axe -> axe.getTitle())
+                                .filter(title -> title != null && !title.isBlank())
+                                .map(String::trim)
+                                .distinct()
+                                .sorted()
+                                .toList()))
+                .toList();
+    }
 
     public LabDTO findById(String id) { return labMapper.toDto(get(id)); }
 
