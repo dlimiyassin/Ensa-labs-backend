@@ -79,6 +79,7 @@ public class LabService {
         assertAcronymAvailable(dto.acronym(), id);
         lab.setTitleFr(dto.titleFr());
         lab.setTitleEn(dto.titleEn());
+        lab.setShortTitle(dto.shortTitle() == null || dto.shortTitle().isBlank() ? null : dto.shortTitle().trim());
         lab.setAcronym(dto.acronym());
         lab.setUniversity(dto.university());
         lab.setProgram(dto.program());

@@ -1,6 +1,7 @@
 package com.ensa.labs.recherche.mapper;
 
 import com.ensa.labs.recherche.bean.Production;
+import com.ensa.labs.recherche.bean.Publication;
 import com.ensa.labs.recherche.dto.ProductionDTO;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +15,12 @@ public class ProductionMapper {
         this.thesisMapper = thesisMapper;
     }
 
+    /** Public showcase: pending and rejected publications are left out. */
     public ProductionDTO toDto(Production production) {
         return new ProductionDTO(
                 production.getId(),
-                production.getPublications().stream().map(publicationMapper::toDto).toList(),
-                production.getCommunications().stream().map(publicationMapper::toDto).toList(),
+                production.getPublications().stream().filter(Publication::isPublic).map(publicationMapper::toDto).toList(),
+                production.getCommunications().stream().filter(Publication::isPublic).map(publicationMapper::toDto).toList(),
                 production.getTheses().stream().map(thesisMapper::toDto).toList(),
                 production.getLab() != null ? production.getLab().getAcronym() : null
         );

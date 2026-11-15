@@ -4,6 +4,7 @@ import com.ensa.labs.recherche.bean.Equipe;
 import com.ensa.labs.recherche.bean.Lab;
 import com.ensa.labs.recherche.bean.Member;
 import com.ensa.labs.recherche.bean.Publication;
+import com.ensa.labs.recherche.bean.enums.PublicationStatus;
 import com.ensa.labs.recherche.dao.EquipeRepository;
 import com.ensa.labs.recherche.dao.MemberRepository;
 import com.ensa.labs.zBase.security.bean.User;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -102,6 +104,43 @@ class AccessControlServiceTest {
         assertThatThrownBy(() -> service.assertCanUpdatePublication(own, "LRSTA", null)).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> service.assertCanUpdatePublication(foreign, "LaRESI", null)).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> service.assertCanDeletePublication(own)).isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void directorReviewsHisLabAndLeaderReviewsHisTeams() {
+        signIn("director", laresi, Roles.LAB_DIRECTOR, Roles.RESEARCHER);
+        var director = service.currentScope();
+        assertThat(service.canReviewPublication(director, "LaRESI", null)).isTrue();
+        assertThat(service.canReviewPublication(director, "LRSTA", null)).isFalse();
+
+        Member leader = signIn("leader", laresi, Roles.TEAM_LEADER, Roles.RESEARCHER);
+        when(equipeRepository.findByResponsableId(leader.getId())).thenReturn(List.of(laresiTeam));
+        var teamLeader = service.currentScope();
+        assertThat(service.canReviewPublication(teamLeader, "LaRESI", "team-1")).isTrue();
+        assertThat(service.canReviewPublication(teamLeader, "LaRESI", null)).isFalse();
+        assertThat(service.canReviewPublication(teamLeader, "LaRESI", "other-team")).isFalse();
+    }
+
+    @Test
+    void researcherCannotReviewAndOnlySeesValidatedOrOwnRecords() {
+        signIn("researcher", laresi, Roles.RESEARCHER);
+        var scope = service.currentScope();
+        User author = userDao.findByUsername("researcher").orElseThrow();
+        User someoneElse = new User();
+        someoneElse.setId("someone-else");
+
+        Publication ownPending = publication(laresi, author);
+        ownPending.setStatus(PublicationStatus.PENDING);
+        Publication foreignPending = publication(laresi, someoneElse);
+        foreignPending.setStatus(PublicationStatus.PENDING);
+        Publication foreignValidated = publication(laresi, someoneElse);
+        foreignValidated.setStatus(PublicationStatus.VALIDATED);
+
+        assertThat(service.canReviewPublication(scope, "LaRESI", null)).isFalse();
+        assertThatThrownBy(() -> service.assertCanReviewPublication(scope, ownPending)).isInstanceOf(AccessDeniedException.class);
+        assertThat(service.canSeeInDashboard(scope, ownPending)).isTrue();
+        assertThat(service.canSeeInDashboard(scope, foreignValidated)).isTrue();
+        assertThat(service.canSeeInDashboard(scope, foreignPending)).isFalse();
     }
 
     @Test

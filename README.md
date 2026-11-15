@@ -61,6 +61,23 @@ All `GET` endpoints of the public website are anonymous. Role checks use `@PreAu
 (`recherche/ws/Authorities.java`); lab / team ownership is enforced in the services by
 `AccessControlService`. Errors come back as `{ message, details, errors? }` with 400 / 401 / 403 / 404 / 409.
 
+### Publication review
+
+Publications and communications go through a review before reaching the public website:
+
+- A record created or edited by someone who cannot review it (a researcher) is `PENDING`.
+- The lab director, the leader of the record's team and the super admin are reviewers: what they
+  create is `VALIDATED` directly, and they approve (`POST /api/publications/{id}/validate`, optional
+  comment) or reject (`POST /api/publications/{id}/reject`, comment required) pending records.
+  The reviewer and the date are stored (`validatedBy`, `validatedAt`).
+- When the author edits a validated or rejected record, it goes back to `PENDING`.
+- Public endpoints (`/api/publications`, `/api/productions/...`, lab pages) only return validated records;
+  the dashboard uses `GET /api/publications/manage` (authenticated, with the review state).
+- A journal article needs a DOI or a `link`. `GET /api/publications/duplicates?doi=&title=&year=`
+  lists records with the same DOI (any form) or the same title and year.
+
+Publications that existed before the workflow are marked validated on the first start.
+
 ### Seeded accounts (empty database)
 
 | Account | Password | Roles |
@@ -82,10 +99,10 @@ responsables receive their new role once.
 
 | Resource | Path | Notes |
 |---|---|---|
-| Labs | `/api/labs` | `acronym/{acronym}`; `thematiquesRecherche` replaces `domainesRecherche` |
+| Labs | `/api/labs` | `acronym/{acronym}`; `thematiquesRecherche` replaces `domainesRecherche`; `shortTitle` = menu name |
 | Teams | `/api/equipes` | `lab/{acronym}` |
 | Members | `/api/members` | `image` = uploaded picture path |
-| Publications | `/api/publications` | attached automatically to the lab production (communications by type) |
+| Publications | `/api/publications` | attached automatically to the lab production (communications by type); `manage`, `duplicates`, `{id}/validate`, `{id}/reject` |
 | Theses | `/api/theses` | attached automatically to the lab production |
 | Productions | `/api/productions` | `lab/{acronym}` returns an empty production when none exists |
 | Collaborations | `/api/collaborations` | `academic`, `industrial`, `lab/{acronym}`; optional `logo` |
@@ -99,7 +116,7 @@ responsables receive their new role once.
 ## Tests
 
 ```bash
-./mvnw test -Dtest='JWTHelperTest,AccessControlServiceTest'
+./mvnw test -Dtest='JWTHelperTest,AccessControlServiceTest,PublicationMatchingTest'
 ```
 
 These unit tests need no database. `LabsApplicationTests` starts the full context and needs PostgreSQL.

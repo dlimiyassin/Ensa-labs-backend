@@ -2,12 +2,14 @@ package com.ensa.labs.zBase.db;
 
 import com.ensa.labs.recherche.bean.Lab;
 import com.ensa.labs.recherche.dao.LabRepository;
+import com.ensa.labs.recherche.dao.PublicationRepository;
 import com.ensa.labs.zBase.db.seeder.*;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
@@ -24,6 +26,13 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final EquipeSeeder equipeSeeder;
     private final RoleAssignmentSeeder roleAssignmentSeeder;
     private final LabRepository labRepository;
+    private final PublicationRepository publicationRepository;
+
+    /** Menu names of the seeded labs, filled once when a lab has none. */
+    private static final Map<String, String> SHORT_TITLES = Map.of(
+            "LRSTA", "Technologies Avancées",
+            "LaRESI", "Ingénierie et Innovation"
+    );
 
     public DatabaseSeeder(
             RoleSeeder roleSeeder,
@@ -37,7 +46,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             ProductionSeeder productionSeeder,
             EquipeSeeder equipeSeeder,
             RoleAssignmentSeeder roleAssignmentSeeder,
-            LabRepository labRepository
+            LabRepository labRepository,
+            PublicationRepository publicationRepository
     ) {
         this.roleSeeder = roleSeeder;
         this.userSeeder = userSeeder;
@@ -51,6 +61,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.equipeSeeder = equipeSeeder;
         this.roleAssignmentSeeder = roleAssignmentSeeder;
         this.labRepository = labRepository;
+        this.publicationRepository = publicationRepository;
     }
 
     /**
@@ -84,5 +95,13 @@ public class DatabaseSeeder implements CommandLineRunner {
         if (roleSeeder.structureRolesCreated()) {
             roleAssignmentSeeder.seed(labs, roles);
         }
+
+        for (Lab lab : labs) {
+            if (lab.getShortTitle() == null && SHORT_TITLES.containsKey(lab.getAcronym())) {
+                lab.setShortTitle(SHORT_TITLES.get(lab.getAcronym()));
+                labRepository.save(lab);
+            }
+        }
+        publicationRepository.validateLegacyPublications();
     }
 }

@@ -1,6 +1,8 @@
 package com.ensa.labs.recherche.service;
 
 import com.ensa.labs.exception.GlobalException;
+import com.ensa.labs.recherche.bean.Publication;
+import com.ensa.labs.recherche.bean.enums.PublicationStatus;
 import com.ensa.labs.recherche.bean.enums.PublicationType;
 import com.ensa.labs.recherche.dao.CollaborationRepository;
 import com.ensa.labs.recherche.dao.CompetenceRepository;
@@ -92,8 +94,14 @@ public class AccountService {
         AccessControlService.Scope scope = accessControlService.currentScope();
         String lab = requestedLab != null && !requestedLab.isBlank() ? requestedLab
                 : scope.isSuperAdmin() ? null : scope.labAcronym();
+        long pendingReviews = publicationRepository.findAll().stream()
+                .filter(p -> p.getStatus() == PublicationStatus.PENDING)
+                .filter(p -> accessControlService.canReviewPublication(scope,
+                        p.getLab() != null ? p.getLab().getAcronym() : null,
+                        p.getEquipe() != null ? p.getEquipe().getId() : null))
+                .count();
         if (lab == null) {
-            var publications = publicationRepository.findAll();
+            var publications = publicationRepository.findAll().stream().filter(Publication::isPublic).toList();
             return new DashboardStatsDTO(null,
                     labRepository.count(),
                     memberRepository.count(),
@@ -103,9 +111,10 @@ public class AccountService {
                     thesisRepository.count(),
                     collaborationRepository.count(),
                     equipmentRepository.count(),
-                    competenceRepository.count());
+                    competenceRepository.count(),
+                    pendingReviews);
         }
-        var publications = publicationRepository.findByLabAcronym(lab);
+        var publications = publicationRepository.findByLabAcronym(lab).stream().filter(Publication::isPublic).toList();
         return new DashboardStatsDTO(lab,
                 labRepository.findByAcronym(lab).isPresent() ? 1 : 0,
                 memberRepository.findByLabAcronym(lab).size(),
@@ -115,10 +124,11 @@ public class AccountService {
                 thesisRepository.findByLabAcronym(lab).size(),
                 collaborationRepository.findByLabAcronym(lab).size(),
                 equipmentRepository.findByLabAcronym(lab).size(),
-                competenceRepository.findByLabAcronym(lab).size());
+                competenceRepository.findByLabAcronym(lab).size(),
+                pendingReviews);
     }
 
-    private static Predicate<com.ensa.labs.recherche.bean.Publication> isCommunication() {
+    private static Predicate<Publication> isCommunication() {
         return p -> p.getType() == PublicationType.COMMUNICATION;
     }
 }

@@ -46,6 +46,7 @@ public class LabMapper {
                 lab.getId(),
                 lab.getTitleFr(),
                 lab.getTitleEn(),
+                lab.getShortTitle(),
                 lab.getAcronym(),
                 lab.getUniversity(),
                 lab.getProgram(),
@@ -69,11 +70,16 @@ public class LabMapper {
         );
     }
 
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
     public Lab toEntity(LabDTO dto) {
         Lab lab = new Lab();
         lab.setId(dto.id());
         lab.setTitleFr(dto.titleFr());
         lab.setTitleEn(dto.titleEn());
+        lab.setShortTitle(blankToNull(dto.shortTitle()));
         lab.setAcronym(dto.acronym());
         lab.setUniversity(dto.university());
         lab.setProgram(dto.program());

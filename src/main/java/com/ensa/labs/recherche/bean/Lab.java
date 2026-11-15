@@ -26,6 +26,10 @@ public class Lab {
     @Column(nullable = false)
     private String titleEn;
 
+    /** Short name for menus ("Ingénierie et Innovation"); the full French title is used elsewhere. */
+    @Column(length = 80)
+    private String shortTitle;
+
     @Column(nullable = false, unique = true)
     private String acronym;
 

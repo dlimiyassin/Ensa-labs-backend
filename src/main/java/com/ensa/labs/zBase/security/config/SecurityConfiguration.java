@@ -43,6 +43,12 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
+    /** Dashboard reads under otherwise public paths (they expose unvalidated records). */
+    private static final String[] PRIVATE_READ_ENDPOINTS = {
+            "/api/publications/manage",
+            "/api/publications/duplicates"
+    };
+
     private static final String[] PUBLIC_READ_ENDPOINTS = {
             "/api/labs/**",
             "/api/equipes/**",
@@ -106,6 +112,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.GET, PRIVATE_READ_ENDPOINTS).authenticated()
                         .requestMatchers(HttpMethod.GET, PUBLIC_READ_ENDPOINTS).permitAll()
                         .requestMatchers("/api/users/**", "/api/roles/**", "/api/auth/register").hasRole("SUPER_ADMIN")
                         .requestMatchers("/actuator/health", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()

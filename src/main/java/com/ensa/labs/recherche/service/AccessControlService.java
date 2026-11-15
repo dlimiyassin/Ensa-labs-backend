@@ -131,8 +131,43 @@ public class AccessControlService {
         assertCanManageLab(existing.getLab() != null ? existing.getLab().getAcronym() : null);
     }
 
-    private boolean isOwner(Scope scope, Publication publication) {
+    /**
+     * Who may approve / reject a publication of this lab and team: the super admin, the lab's
+     * director, or the leader of the publication's team. Their own records are validated directly.
+     */
+    public boolean canReviewPublication(Scope scope, String labAcronym, String equipeId) {
+        if (scope.isSuperAdmin()) return true;
+        if (scope.has(Roles.LAB_DIRECTOR) && scope.inLab(labAcronym)) return true;
+        return scope.has(Roles.TEAM_LEADER) && scope.inLab(labAcronym) && scope.leads(equipeId);
+    }
+
+    public void assertCanReviewPublication(Scope scope, Publication publication) {
+        if (!canReviewPublication(scope, labOf(publication), equipeOf(publication))) {
+            throw new AccessDeniedException("Only the lab director or the team leader can review this publication");
+        }
+    }
+
+    /**
+     * Dashboard visibility: directors and team leaders see every record of their lab,
+     * researchers see the validated records of their lab plus their own submissions.
+     */
+    public boolean canSeeInDashboard(Scope scope, Publication publication) {
+        if (scope.isSuperAdmin() || isOwner(scope, publication)) return true;
+        if (!scope.inLab(labOf(publication))) return false;
+        if (scope.has(Roles.LAB_DIRECTOR) || scope.has(Roles.TEAM_LEADER)) return true;
+        return publication.isPublic();
+    }
+
+    public boolean isOwner(Scope scope, Publication publication) {
         return scope.user() != null && publication.getCreatedBy() != null
                 && Objects.equals(scope.user().getId(), publication.getCreatedBy().getId());
+    }
+
+    private static String labOf(Publication publication) {
+        return publication.getLab() != null ? publication.getLab().getAcronym() : null;
+    }
+
+    private static String equipeOf(Publication publication) {
+        return publication.getEquipe() != null ? publication.getEquipe().getId() : null;
     }
 }

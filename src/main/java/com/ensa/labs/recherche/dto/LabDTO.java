@@ -11,6 +11,7 @@ public record LabDTO(
         String id,
         @NotBlank String titleFr,
         @NotBlank String titleEn,
+        @Size(max = 60) String shortTitle,
         @NotBlank @Size(max = 50) String acronym,
         String university,
         String program,
