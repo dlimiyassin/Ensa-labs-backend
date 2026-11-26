@@ -11,6 +11,7 @@ import com.ensa.labs.recherche.mapper.UserMapper;
 import com.ensa.labs.zBase.security.bean.User;
 import com.ensa.labs.zBase.security.dao.facade.RoleDao;
 import com.ensa.labs.zBase.security.dao.facade.UserDao;
+import com.ensa.labs.zBase.testing.TestProfileAccess;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,9 +45,26 @@ public class UserManagementService {
         this.accessControlService = accessControlService;
     }
 
-    public List<UserDTO> findAll() { return userDao.findAll().stream().map(userMapper::toDto).toList(); }
+    public List<UserDTO> findAll() {
+        boolean testSession = isTestSession();
+        return userDao.findAll().stream()
+                .filter(account -> !testSession || TestProfileAccess.isTestAccount(account.getUsername()))
+                .map(userMapper::toDto)
+                .toList();
+    }
 
-    public UserDTO findById(String id) { return userMapper.toDto(get(id)); }
+    public UserDTO findById(String id) {
+        User account = get(id);
+        if (isTestSession() && !TestProfileAccess.isTestAccount(account.getUsername())) {
+            throw new ResourceNotFoundException("User", "id", id);
+        }
+        return userMapper.toDto(account);
+    }
+
+    private boolean isTestSession() {
+        return accessControlService.currentUser()
+                .map(account -> TestProfileAccess.isTestAccount(account.getUsername())).orElse(false);
+    }
 
     @Transactional
     public UserDTO create(UserDTO dto) {
@@ -127,6 +145,9 @@ public class UserManagementService {
     }
 
     private void assertUnique(UserDTO dto, String currentId) {
+        if (TestProfileAccess.isTestAccount(dto.username())) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "This username is reserved for test profiles");
+        }
         userDao.findByUsername(dto.username())
                 .filter(other -> !other.getId().equals(currentId))
                 .ifPresent(other -> {

@@ -7,6 +7,7 @@ import com.ensa.labs.recherche.bean.Publication;
 import com.ensa.labs.recherche.bean.enums.PublicationStatus;
 import com.ensa.labs.recherche.dao.EquipeRepository;
 import com.ensa.labs.recherche.dao.MemberRepository;
+import com.ensa.labs.recherche.dao.LabRepository;
 import com.ensa.labs.zBase.security.bean.User;
 import com.ensa.labs.zBase.security.constant.Roles;
 import com.ensa.labs.zBase.security.dao.facade.UserDao;
@@ -35,7 +36,8 @@ class AccessControlServiceTest {
     private final UserDao userDao = mock(UserDao.class);
     private final MemberRepository memberRepository = mock(MemberRepository.class);
     private final EquipeRepository equipeRepository = mock(EquipeRepository.class);
-    private final AccessControlService service = new AccessControlService(userDao, memberRepository, equipeRepository, true);
+    private final LabRepository labRepository = mock(LabRepository.class);
+    private final AccessControlService service = new AccessControlService(userDao, memberRepository, equipeRepository, labRepository, true);
 
     private Lab laresi;
     private Lab lrsta;
@@ -150,7 +152,7 @@ class AccessControlServiceTest {
 
     @Test
     void everythingAllowedWhenSecurityIsDisabled() {
-        AccessControlService open = new AccessControlService(userDao, memberRepository, equipeRepository, false);
+        AccessControlService open = new AccessControlService(userDao, memberRepository, equipeRepository, labRepository, false);
 
         assertThatCode(() -> open.assertCanManageLab("LRSTA")).doesNotThrowAnyException();
     }

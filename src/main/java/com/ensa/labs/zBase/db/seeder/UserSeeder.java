@@ -5,6 +5,7 @@ import com.ensa.labs.zBase.security.bean.Role;
 import com.ensa.labs.zBase.security.bean.User;
 import com.ensa.labs.zBase.security.bean.enums.UserStatus;
 import com.ensa.labs.zBase.security.dao.facade.UserDao;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -13,16 +14,20 @@ import com.ensa.labs.zBase.security.constant.Roles;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 public class UserSeeder {
 
     private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
+    private final String adminPassword;
 
-    public UserSeeder(UserDao userDao, PasswordEncoder passwordEncoder) {
+    public UserSeeder(UserDao userDao, PasswordEncoder passwordEncoder,
+                      @Value("${ENSA_ADMIN_PASSWORD:}") String adminPassword) {
         this.userDao = userDao;
         this.passwordEncoder = passwordEncoder;
+        this.adminPassword = adminPassword;
     }
 
     public User seedAdmin(Map<String, Role> roles) {
@@ -36,7 +41,10 @@ public class UserSeeder {
             user.setEnabled(true);
             user.setStatus(UserStatus.ACTIF);
             user.setRoles(new HashSet<>(Set.of(roles.get(Roles.SUPER_ADMIN))));
-            user.setPassword(passwordEncoder.encode("AA111"));
+            if (adminPassword.length() < 20) {
+                throw new IllegalStateException("ENSA_ADMIN_PASSWORD must have at least 20 characters");
+            }
+            user.setPassword(passwordEncoder.encode(adminPassword));
             return userDao.save(user);
         });
     }
@@ -50,10 +58,10 @@ public class UserSeeder {
             user.setCin(generateCin(data));
             user.setFirstName(data.firstName());
             user.setLastName(data.lastName());
-            user.setEnabled(true);
-            user.setStatus(UserStatus.ACTIF);
+            user.setEnabled(false);
+            user.setStatus(UserStatus.EN_ATTENTE);
             user.setRoles(new HashSet<>(Set.of(roles.get(Roles.RESEARCHER))));
-            user.setPassword(passwordEncoder.encode(user.getCin()));
+            user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
             return userDao.save(user);
         });
     }

@@ -5,6 +5,7 @@ import com.ensa.labs.recherche.dao.LabRepository;
 import com.ensa.labs.recherche.dao.PublicationRepository;
 import com.ensa.labs.zBase.db.seeder.*;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,9 @@ import java.util.Map;
 
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
+
+    @Value("${ENSA_ENABLE_DEMO_DATA:false}")
+    private boolean demoDataEnabled;
 
     private final RoleSeeder roleSeeder;
     private final UserSeeder userSeeder;
@@ -77,7 +81,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         userSeeder.seedAdmin(roles);
 
         List<Lab> labs;
-        if (labRepository.count() == 0) {
+        boolean initialCatalog = demoDataEnabled && labRepository.count() == 0;
+        if (initialCatalog) {
             memberSeeder.seed(roles);
             labs = labSeeder.seed();
             for (var lab : labs) {
@@ -92,7 +97,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             labs = labRepository.findAll();
         }
 
-        if (roleSeeder.structureRolesCreated()) {
+        if (initialCatalog || roleSeeder.structureRolesCreated()) {
             roleAssignmentSeeder.seed(labs, roles);
         }
 

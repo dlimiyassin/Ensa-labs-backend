@@ -2,6 +2,7 @@ package com.ensa.labs.zBase.security.config;
 
 import com.ensa.labs.zBase.security.filter.JWTAuthorizationFilter;
 import com.ensa.labs.zBase.security.utils.JWTHelper;
+import com.ensa.labs.zBase.testing.TestProfileAccess;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -65,13 +66,15 @@ public class SecurityConfiguration {
     };
 
     private final JWTHelper jwtHelper;
+    private final TestProfileAccess testProfileAccess;
     private final boolean isSecurityEnabled;
     private final List<String> allowedOrigins;
 
-    public SecurityConfiguration(JWTHelper jwtHelper,
+    public SecurityConfiguration(JWTHelper jwtHelper, TestProfileAccess testProfileAccess,
                                  @Value("${security.enabled:true}") boolean isSecurityEnabled,
                                  @Value("${app.cors.allowed-origins:http://localhost:4200}") String allowedOrigins) {
         this.jwtHelper = jwtHelper;
+        this.testProfileAccess = testProfileAccess;
         this.isSecurityEnabled = isSecurityEnabled;
         this.allowedOrigins = Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
@@ -112,6 +115,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/test-profiles", "/api/test-profiles/*").permitAll()
                         .requestMatchers(HttpMethod.GET, PRIVATE_READ_ENDPOINTS).authenticated()
                         .requestMatchers(HttpMethod.GET, PUBLIC_READ_ENDPOINTS).permitAll()
                         .requestMatchers("/api/users/**", "/api/roles/**", "/api/auth/register").hasRole("SUPER_ADMIN")
@@ -120,7 +124,7 @@ public class SecurityConfiguration {
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                         .accessDeniedHandler((request, response, denied) -> response.setStatus(HttpStatus.FORBIDDEN.value())))
-                .addFilterBefore(new JWTAuthorizationFilter(jwtHelper), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JWTAuthorizationFilter(jwtHelper, testProfileAccess), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

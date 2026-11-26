@@ -1,14 +1,18 @@
 package com.ensa.labs.recherche.service;
 
 import com.ensa.labs.recherche.bean.Equipe;
+import com.ensa.labs.recherche.bean.Lab;
 import com.ensa.labs.recherche.bean.Member;
 import com.ensa.labs.recherche.bean.Publication;
 import com.ensa.labs.recherche.dao.EquipeRepository;
 import com.ensa.labs.recherche.dao.MemberRepository;
+import com.ensa.labs.recherche.dao.LabRepository;
 import com.ensa.labs.zBase.security.bean.User;
 import com.ensa.labs.zBase.security.constant.Roles;
 import com.ensa.labs.zBase.security.dao.facade.UserDao;
+import com.ensa.labs.zBase.testing.TestProfileAccess;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +20,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -32,15 +38,18 @@ public class AccessControlService {
     private final UserDao userDao;
     private final MemberRepository memberRepository;
     private final EquipeRepository equipeRepository;
+    private final LabRepository labRepository;
     private final boolean securityEnabled;
 
     public AccessControlService(UserDao userDao,
                                 MemberRepository memberRepository,
                                 EquipeRepository equipeRepository,
+                                LabRepository labRepository,
                                 @Value("${security.enabled:true}") boolean securityEnabled) {
         this.userDao = userDao;
         this.memberRepository = memberRepository;
         this.equipeRepository = equipeRepository;
+        this.labRepository = labRepository;
         this.securityEnabled = securityEnabled;
     }
 
@@ -48,6 +57,10 @@ public class AccessControlService {
     public record Scope(User user, Set<String> roles, Member member, String labAcronym, Set<String> ledEquipeIds) {
         public boolean has(String role) {
             return roles.contains(role);
+        }
+
+        public boolean isTestAccount() {
+            return user != null && TestProfileAccess.isTestAccount(user.getUsername());
         }
 
         public boolean isSuperAdmin() {
@@ -75,12 +88,32 @@ public class AccessControlService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
         User user = userDao.findByUsername(authentication.getName()).orElse(null);
+        if (user != null && TestProfileAccess.isTestAccount(user.getUsername())) {
+            return testScope(user, roles);
+        }
         Member member = user == null ? null : memberRepository.findByUserId(user.getId()).orElse(null);
         String labAcronym = member != null && member.getLab() != null ? member.getLab().getAcronym() : null;
         Set<String> ledEquipeIds = member == null ? Set.of() : equipeRepository.findByResponsableId(member.getId()).stream()
                 .map(Equipe::getId)
                 .collect(Collectors.toSet());
         return new Scope(user, roles, member, labAcronym, ledEquipeIds);
+    }
+
+    private Scope testScope(User user, Set<String> roles) {
+        if (roles.contains(Roles.SUPER_ADMIN)) {
+            return new Scope(user, roles, null, null, Set.of());
+        }
+        List<Lab> labs = labRepository.findAll(Sort.by("acronym"));
+        if (labs.isEmpty()) {
+            return new Scope(user, roles, null, null, Set.of());
+        }
+        int index = labs.size() > 1 && user.getUsername().endsWith("-b") ? 1 : 0;
+        String acronym = labs.get(index).getAcronym();
+        Set<String> teamIds = roles.contains(Roles.TEAM_LEADER)
+                ? equipeRepository.findByLabAcronym(acronym).stream().min(Comparator.comparing(Equipe::getId))
+                        .map(team -> Set.of(team.getId())).orElse(Set.of())
+                : Set.of();
+        return new Scope(user, roles, null, acronym, teamIds);
     }
 
     public Optional<User> currentUser() {
@@ -152,6 +185,7 @@ public class AccessControlService {
      * researchers see the validated records of their lab plus their own submissions.
      */
     public boolean canSeeInDashboard(Scope scope, Publication publication) {
+        if (scope.isTestAccount() && !publication.isPublic()) return false;
         if (scope.isSuperAdmin() || isOwner(scope, publication)) return true;
         if (!scope.inLab(labOf(publication))) return false;
         if (scope.has(Roles.LAB_DIRECTOR) || scope.has(Roles.TEAM_LEADER)) return true;

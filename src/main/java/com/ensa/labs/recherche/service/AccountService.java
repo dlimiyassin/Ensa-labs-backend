@@ -94,7 +94,10 @@ public class AccountService {
         AccessControlService.Scope scope = accessControlService.currentScope();
         String lab = requestedLab != null && !requestedLab.isBlank() ? requestedLab
                 : scope.isSuperAdmin() ? null : scope.labAcronym();
-        long pendingReviews = publicationRepository.findAll().stream()
+        if (scope.isTestAccount() && !scope.isSuperAdmin()) {
+            lab = scope.labAcronym();
+        }
+        long pendingReviews = scope.isTestAccount() ? 0 : publicationRepository.findAll().stream()
                 .filter(p -> p.getStatus() == PublicationStatus.PENDING)
                 .filter(p -> accessControlService.canReviewPublication(scope,
                         p.getLab() != null ? p.getLab().getAcronym() : null,

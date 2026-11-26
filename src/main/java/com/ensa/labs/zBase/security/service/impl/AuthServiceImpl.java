@@ -13,6 +13,7 @@ import com.ensa.labs.zBase.security.utils.JWTHelper;
 import com.ensa.labs.zBase.security.ws.dto.JWTAuthResponse;
 import com.ensa.labs.zBase.security.ws.dto.LoginDto;
 import com.ensa.labs.zBase.security.ws.dto.RegisterDto;
+import com.ensa.labs.zBase.testing.TestProfileAccess;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -39,22 +40,38 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JWTHelper jwtHelper;
     private final UserService userService;
+    private final TestProfileAccess testProfileAccess;
 
-    public AuthServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTHelper jwtHelper, UserService userService) {
+    public AuthServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder,
+                           AuthenticationManager authenticationManager, JWTHelper jwtHelper,
+                           UserService userService, TestProfileAccess testProfileAccess) {
         this.userDao = userDao;
         this.roleDao = roleDao;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtHelper = jwtHelper;
         this.userService = userService;
+        this.testProfileAccess = testProfileAccess;
     }
 
     @Override
     public JWTAuthResponse login(LoginDto loginDto) {
         Authentication authenticate;
         try {
+            String identifier = loginDto.getUsername().strip();
+            String username = identifier;
+            if (identifier.contains("@")) {
+                List<User> matches = userDao.findTop2ByEmailIgnoreCase(identifier);
+                if (matches.size() > 1) {
+                    throw new BadCredentialsException("Username or Password incorrect");
+                }
+                if (!matches.isEmpty()) {
+                    username = matches.getFirst().getUsername();
+                }
+            }
+            testProfileAccess.requireAccountAccess(username);
             authenticate = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
+                    new UsernamePasswordAuthenticationToken(username, loginDto.getPassword()));
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Username or Password incorrect");
         }
@@ -72,6 +89,7 @@ public class AuthServiceImpl implements AuthService {
         } catch (JWTVerificationException e) {
             throw new BadCredentialsException("Invalid or expired refresh token");
         }
+        testProfileAccess.requireAccountAccess(username);
         User user = userDao.findByUsername(username)
                 .orElseThrow(() -> new BadCredentialsException("Invalid or expired refresh token"));
         if (!user.isEnabled() || user.getStatus() == UserStatus.BLOQUE) {
@@ -83,6 +101,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String register(RegisterDto registerDto) {
+        if (TestProfileAccess.isTestAccount(registerDto.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This username is reserved for test profiles");
+        }
         if (userDao.findByUsername(registerDto.getUsername()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
