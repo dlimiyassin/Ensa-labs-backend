@@ -14,6 +14,7 @@ import com.ensa.labs.zBase.security.dao.facade.UserDao;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -89,6 +90,17 @@ class AccessControlServiceTest {
         assertThatCode(() -> service.assertCanCreatePublication("LaRESI", "team-1")).doesNotThrowAnyException();
         assertThatThrownBy(() -> service.assertCanCreatePublication("LaRESI", "other-team")).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> service.assertCanCreatePublication("LRSTA", "team-1")).isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void secondTestLeaderUsesAnExistingTeamWithoutASeparateLab() {
+        signIn("ensa-test-team-leader-b", null, Roles.TEAM_LEADER);
+        when(equipeRepository.findAll(Sort.by("id"))).thenReturn(List.of(laresiTeam));
+
+        var scope = service.currentScope();
+        assertThat(scope.labAcronym()).isEqualTo("LaRESI");
+        assertThat(scope.ledEquipeIds()).containsExactly("team-1");
+        assertThat(scope.member()).isNull();
     }
 
     @Test

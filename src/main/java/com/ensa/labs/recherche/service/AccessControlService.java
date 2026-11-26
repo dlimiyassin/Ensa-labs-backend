@@ -20,7 +20,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -103,17 +102,20 @@ public class AccessControlService {
         if (roles.contains(Roles.SUPER_ADMIN)) {
             return new Scope(user, roles, null, null, Set.of());
         }
+        boolean secondAccount = user.getUsername().endsWith("-b");
+        if (roles.contains(Roles.TEAM_LEADER)) {
+            List<Equipe> teams = equipeRepository.findAll(Sort.by("id"));
+            if (!teams.isEmpty()) {
+                Equipe team = teams.get(secondAccount && teams.size() > 1 ? 1 : 0);
+                return new Scope(user, roles, null, team.getLab().getAcronym(), Set.of(team.getId()));
+            }
+        }
         List<Lab> labs = labRepository.findAll(Sort.by("acronym"));
         if (labs.isEmpty()) {
             return new Scope(user, roles, null, null, Set.of());
         }
-        int index = labs.size() > 1 && user.getUsername().endsWith("-b") ? 1 : 0;
-        String acronym = labs.get(index).getAcronym();
-        Set<String> teamIds = roles.contains(Roles.TEAM_LEADER)
-                ? equipeRepository.findByLabAcronym(acronym).stream().min(Comparator.comparing(Equipe::getId))
-                        .map(team -> Set.of(team.getId())).orElse(Set.of())
-                : Set.of();
-        return new Scope(user, roles, null, acronym, teamIds);
+        Lab lab = labs.get(secondAccount && labs.size() > 1 ? 1 : 0);
+        return new Scope(user, roles, null, lab.getAcronym(), Set.of());
     }
 
     public Optional<User> currentUser() {
