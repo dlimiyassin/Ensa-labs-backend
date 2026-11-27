@@ -23,14 +23,16 @@ public class MemberService {
     private final UserDao userDao;
     private final MemberMapper memberMapper;
     private final AccessControlService accessControlService;
+    private final LabStructureSync labStructureSync;
 
-    public MemberService(MemberRepository memberRepository, LabRepository labRepository, EquipeRepository equipeRepository, UserDao userDao, MemberMapper memberMapper, AccessControlService accessControlService) {
+    public MemberService(MemberRepository memberRepository, LabRepository labRepository, EquipeRepository equipeRepository, UserDao userDao, MemberMapper memberMapper, AccessControlService accessControlService, LabStructureSync labStructureSync) {
         this.memberRepository = memberRepository;
         this.labRepository = labRepository;
         this.equipeRepository = equipeRepository;
         this.userDao = userDao;
         this.memberMapper = memberMapper;
         this.accessControlService = accessControlService;
+        this.labStructureSync = labStructureSync;
     }
 
     public List<MemberDTO> findAll() { return memberRepository.findAll().stream().map(memberMapper::toDto).toList(); }
@@ -45,7 +47,9 @@ public class MemberService {
         Member member = memberMapper.toEntity(dto);
         member.setId(null);
         applyRelations(member, dto);
-        return memberMapper.toDto(memberRepository.save(member));
+        Member saved = memberRepository.save(member);
+        labStructureSync.syncCommitteeSeat(saved);
+        return memberMapper.toDto(saved);
     }
 
     @Transactional
@@ -63,7 +67,11 @@ public class MemberService {
         member.setImage(dto.image());
         member.setPhdStudents(dto.phdStudents() == null ? new ArrayList<>() : new ArrayList<>(dto.phdStudents()));
         applyRelations(member, dto);
-        return memberMapper.toDto(memberRepository.save(member));
+        Member saved = memberRepository.save(member);
+        labStructureSync.syncCommitteeSeat(saved);
+        // A newly linked account of a director / deputy director gets the director role.
+        labStructureSync.syncDirectorRoles(List.of());
+        return memberMapper.toDto(saved);
     }
 
     /** Removes the member and every reference to it (lab direction, committee, teams). */

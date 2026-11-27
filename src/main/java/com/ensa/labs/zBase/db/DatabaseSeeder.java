@@ -3,6 +3,7 @@ package com.ensa.labs.zBase.db;
 import com.ensa.labs.recherche.bean.Lab;
 import com.ensa.labs.recherche.dao.LabRepository;
 import com.ensa.labs.recherche.dao.PublicationRepository;
+import com.ensa.labs.recherche.service.LabStructureSync;
 import com.ensa.labs.zBase.db.seeder.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final RoleAssignmentSeeder roleAssignmentSeeder;
     private final LabRepository labRepository;
     private final PublicationRepository publicationRepository;
+    private final LabStructureSync labStructureSync;
 
     /** Menu names of the seeded labs, filled once when a lab has none. */
     private static final Map<String, String> SHORT_TITLES = Map.of(
@@ -51,7 +53,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             EquipeSeeder equipeSeeder,
             RoleAssignmentSeeder roleAssignmentSeeder,
             LabRepository labRepository,
-            PublicationRepository publicationRepository
+            PublicationRepository publicationRepository,
+            LabStructureSync labStructureSync
     ) {
         this.roleSeeder = roleSeeder;
         this.userSeeder = userSeeder;
@@ -66,6 +69,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.roleAssignmentSeeder = roleAssignmentSeeder;
         this.labRepository = labRepository;
         this.publicationRepository = publicationRepository;
+        this.labStructureSync = labStructureSync;
     }
 
     /**
@@ -108,5 +112,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             }
         }
         publicationRepository.validateLegacyPublications();
+        labStructureSync.syncAll();
     }
 }

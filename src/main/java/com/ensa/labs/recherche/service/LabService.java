@@ -6,6 +6,7 @@ import com.ensa.labs.exception.ResourceNotFoundException;
 import com.ensa.labs.recherche.bean.ComiteGestionMembre;
 import com.ensa.labs.recherche.bean.Lab;
 import com.ensa.labs.recherche.bean.Member;
+import com.ensa.labs.recherche.bean.enums.MemberRoleInLab;
 import com.ensa.labs.recherche.dao.DepartmentRepository;
 import com.ensa.labs.recherche.dao.LabRepository;
 import com.ensa.labs.recherche.dao.MemberRepository;
@@ -22,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class LabService {
@@ -35,11 +38,12 @@ public class LabService {
     private final ThematiqueRechercheService thematiqueRechercheService;
     private final ProductionService productionService;
     private final AccessControlService accessControlService;
+    private final LabStructureSync labStructureSync;
 
     public LabService(LabRepository labRepository, DepartmentRepository departmentRepository, TagRepository tagRepository,
                       MemberRepository memberRepository, PublicationRepository publicationRepository, ThesisRepository thesisRepository,
                       LabMapper labMapper, ThematiqueRechercheService thematiqueRechercheService, ProductionService productionService,
-                      AccessControlService accessControlService) {
+                      AccessControlService accessControlService, LabStructureSync labStructureSync) {
         this.labRepository = labRepository;
         this.departmentRepository = departmentRepository;
         this.tagRepository = tagRepository;
@@ -50,6 +54,7 @@ public class LabService {
         this.thematiqueRechercheService = thematiqueRechercheService;
         this.productionService = productionService;
         this.accessControlService = accessControlService;
+        this.labStructureSync = labStructureSync;
     }
 
     public List<LabDTO> findAll() { return labRepository.findAll().stream().map(labMapper::toDto).toList(); }
@@ -94,6 +99,7 @@ public class LabService {
         applyRelations(lab, dto);
         Lab saved = labRepository.save(lab);
         productionService.getOrCreateForLab(saved);
+        labStructureSync.syncDirectorRoles(List.of());
         return labMapper.toDto(saved);
     }
 
@@ -113,8 +119,11 @@ public class LabService {
         lab.setEstablishment(dto.establishment());
         lab.setPhone(dto.phone());
         lab.setEmail(dto.email());
+        List<Member> formerLeaders = java.util.Arrays.asList(lab.getDirecteur(), lab.getDirecteurAdjoint());
         applyRelations(lab, dto);
-        return labMapper.toDto(labRepository.save(lab));
+        Lab saved = labRepository.save(lab);
+        labStructureSync.syncDirectorRoles(formerLeaders);
+        return labMapper.toDto(saved);
     }
 
     /** Only empty labs can be deleted: members, teams and scientific records must be moved or removed first. */
@@ -174,6 +183,18 @@ public class LabService {
                 membre.setRoleComite(c.roleComite());
                 return membre;
             }).toList()));
+            // A "management committee" member taken off the committee goes back to a plain member,
+            // so the member form and the public committee list keep saying the same thing.
+            Set<String> seated = lab.getComiteGestion().stream()
+                    .filter(seat -> seat.getMember() != null)
+                    .map(seat -> seat.getMember().getId())
+                    .collect(Collectors.toSet());
+            List.copyOf(lab.getMembers()).stream()
+                    .filter(m -> m.getRoleInLab() == MemberRoleInLab.MANAGEMENT_COMMITTEE && !seated.contains(m.getId()))
+                    .forEach(m -> {
+                        m.setRoleInLab(MemberRoleInLab.MEMBER);
+                        memberRepository.save(m);
+                    });
         }
     }
 

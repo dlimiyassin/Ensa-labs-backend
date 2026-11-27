@@ -33,9 +33,11 @@ public class UserManagementService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final AccessControlService accessControlService;
+    private final LabStructureSync labStructureSync;
 
     public UserManagementService(UserDao userDao, RoleDao roleDao, MemberRepository memberRepository, PublicationRepository publicationRepository,
-                                 PasswordEncoder passwordEncoder, UserMapper userMapper, AccessControlService accessControlService) {
+                                 PasswordEncoder passwordEncoder, UserMapper userMapper, AccessControlService accessControlService,
+                                 LabStructureSync labStructureSync) {
         this.userDao = userDao;
         this.roleDao = roleDao;
         this.memberRepository = memberRepository;
@@ -43,6 +45,7 @@ public class UserManagementService {
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.accessControlService = accessControlService;
+        this.labStructureSync = labStructureSync;
     }
 
     public List<UserDTO> findAll() {
@@ -77,6 +80,8 @@ public class UserManagementService {
         applyRoles(user, dto);
         User saved = userDao.save(user);
         linkMember(saved, dto.memberId());
+        // The account of a lab director or deputy director always gets the director role.
+        labStructureSync.syncDirectorRoles(List.of());
         return userMapper.toDto(saved);
     }
 
@@ -96,6 +101,8 @@ public class UserManagementService {
         applyRoles(user, dto);
         User saved = userDao.save(user);
         linkMember(saved, dto.memberId());
+        // The account of a lab director or deputy director always gets the director role.
+        labStructureSync.syncDirectorRoles(List.of());
         return userMapper.toDto(saved);
     }
 
