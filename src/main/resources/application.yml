@@ -41,6 +41,21 @@ app:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
   files:
     upload-dir: ${UPLOAD_DIR:uploads}
+  # Public address of the site, used in the links sent by e-mail (no trailing slash).
+  public-url: ${APP_PUBLIC_URL:http://localhost:4200}
+  mail:
+    # Leave MAIL_HOST empty to turn e-mail sending off (password reset requests are then ignored).
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    # STARTTLS on ports other than 465; only a local test server runs without it.
+    starttls: ${MAIL_STARTTLS:true}
+    # Sender address; defaults to MAIL_USERNAME.
+    from: ${MAIL_FROM:}
+  password-reset:
+    # Lifetime of a reset link, in minutes.
+    token-validity-minutes: ${PASSWORD_RESET_VALIDITY_MINUTES:30}
 
 export:
   anonymization:
